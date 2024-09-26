@@ -1,0 +1,5 @@
+{
+  "/listuser/page": "app/listuser/page.js",
+  "/protected/page": "app/protected/page.js",
+  "/Api/AddUser/route": "app/Api/AddUser/route.js"
+}
