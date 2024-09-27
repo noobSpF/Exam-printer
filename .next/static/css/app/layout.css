@@ -569,19 +569,6 @@ video {
   --tw-backdrop-saturate:  ;
   --tw-backdrop-sepia:  ;
 }
-.container {
-  width: 100%;
-  margin-right: auto;
-  margin-left: auto;
-  padding-right: 2rem;
-  padding-left: 2rem;
-}
-@media (min-width: 1400px) {
-
-  .container {
-    max-width: 1400px;
-  }
-}
 .sr-only {
   position: absolute;
   width: 1px;
@@ -667,9 +654,6 @@ video {
 .mt-4 {
   margin-top: 1rem;
 }
-.mt-8 {
-  margin-top: 2rem;
-}
 .flex {
   display: flex;
 }
@@ -697,20 +681,20 @@ video {
 .h-4 {
   height: 1rem;
 }
+.h-5 {
+  height: 1.25rem;
+}
 .h-6 {
   height: 1.5rem;
 }
 .h-9 {
   height: 2.25rem;
 }
-.h-full {
-  height: 100%;
+.h-auto {
+  height: auto;
 }
 .h-px {
   height: 1px;
-}
-.max-h-32 {
-  max-height: 8rem;
 }
 .min-h-screen {
   min-height: 100vh;
@@ -721,20 +705,26 @@ video {
 .w-2 {
   width: 0.5rem;
 }
+.w-2\/5 {
+  width: 40%;
+}
 .w-3 {
   width: 0.75rem;
 }
 .w-3\.5 {
   width: 0.875rem;
 }
+.w-3\/5 {
+  width: 60%;
+}
 .w-4 {
   width: 1rem;
 }
+.w-5 {
+  width: 1.25rem;
+}
 .w-full {
   width: 100%;
-}
-.min-w-64 {
-  min-width: 16rem;
 }
 .min-w-\[8rem\] {
   min-width: 8rem;
@@ -750,9 +740,6 @@ video {
 }
 .max-w-xl {
   max-width: 36rem;
-}
-.flex-1 {
-  flex: 1 1 0%;
 }
 .shrink-0 {
   flex-shrink: 0;
@@ -809,9 +796,6 @@ video {
 .gap-2 {
   gap: 0.5rem;
 }
-.gap-3 {
-  gap: 0.75rem;
-}
 .gap-4 {
   gap: 1rem;
 }
@@ -820,9 +804,6 @@ video {
 }
 .gap-8 {
   gap: 2rem;
-}
-.overflow-auto {
-  overflow: auto;
 }
 .overflow-hidden {
   overflow: hidden;
@@ -872,9 +853,6 @@ video {
 }
 .border-transparent {
   border-color: transparent;
-}
-.bg-accent {
-  background-color: hsl(var(--accent));
 }
 .bg-background {
   background-color: hsl(var(--background));
@@ -935,9 +913,6 @@ video {
 }
 .p-3 {
   padding: 0.75rem;
-}
-.p-4 {
-  padding: 1rem;
 }
 .p-6 {
   padding: 1.5rem;
@@ -1001,6 +976,9 @@ video {
   padding-top: 0.2rem;
   padding-bottom: 0.2rem;
 }
+.pl-10 {
+  padding-left: 2.5rem;
+}
 .pl-8 {
   padding-left: 2rem;
 }
@@ -1012,10 +990,6 @@ video {
 }
 .font-mono {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-.text-2xl {
-  font-size: 1.5rem;
-  line-height: 2rem;
 }
 .text-3xl {
   font-size: 1.875rem;
@@ -1063,9 +1037,6 @@ video {
 .text-foreground {
   color: hsl(var(--foreground));
 }
-.text-foreground\/60 {
-  color: hsl(var(--foreground) / 0.6);
-}
 .text-foreground\/80 {
   color: hsl(var(--foreground) / 0.8);
 }
@@ -1096,15 +1067,16 @@ video {
   --tw-text-opacity: 1;
   color: rgb(126 34 206 / var(--tw-text-opacity));
 }
+.text-red-600 {
+  --tw-text-opacity: 1;
+  color: rgb(220 38 38 / var(--tw-text-opacity));
+}
 .text-secondary-foreground {
   color: hsl(var(--secondary-foreground));
 }
 .text-white {
   --tw-text-opacity: 1;
   color: rgb(255 255 255 / var(--tw-text-opacity));
-}
-.underline {
-  text-decoration-line: underline;
 }
 .underline-offset-4 {
   text-underline-offset: 4px;
@@ -1381,13 +1353,5 @@ video {
     font-size: 2.25rem;
     line-height: 2.5rem;
   }
-}
-
-.\[\&\>input\]\:mb-3>input {
-  margin-bottom: 0.75rem;
-}
-
-.\[\&\>input\]\:mb-4>input {
-  margin-bottom: 1rem;
 }
 
