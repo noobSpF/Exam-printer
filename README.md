@@ -56,3 +56,26 @@ If you wish to just develop locally and not deploy to Vercel, [follow the steps 
    ```bash
    cd exam-printer
    ```
+
+4. Rename `.env.example` to `.env.local` and update the following:
+
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
+   ```
+
+   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
+
+5. Install the dependencies:
+
+   ```bash
+   npm install
+   ```
+
+6. You can now run the Next.js local development server:
+
+   ```bash
+   npm run dev
+   ```
+
+   Should now be running on [localhost:3000](http://localhost:3000/).
