@@ -14,30 +14,29 @@ export const signInAction = async (formData: FormData) => {
 
   const supabase = createClient();
 
-  // ตรวจสอบ Email และ Password ในตาราง Users
-  const { data: user, error } = await supabase
+  // Fetch the user by email
+  const { data: user, error: userError } = await supabase
     .from('Users')
     .select('Email, Password, Role')
     .eq('Email', email)
-    .eq('Password', password) // ตรวจสอบว่ารหัสผ่านตรงกันหรือไม่
-    .single(); // ดึงข้อมูลเพียง 1 แถว
+    .single(); // Make sure there’s only one user returned
 
-  if (error) {
-    // เพิ่ม console log เพื่อตรวจสอบข้อผิดพลาด
-    console.error('Sign-In Query Error:', error.message);
-    return encodedRedirect('error', '/Error', 'Invalid login credentials');
+  if (userError || !user) {
+    console.error('Sign-In Query Error:', userError?.message);
+    return encodedRedirect('error', '/Error', 'Invalid email or password');
   }
 
-  if (!user) {
-    console.error('User Not Found');
-    return encodedRedirect('error', '/Error', 'Invalid login credentials');
+  // Check if the password matches
+  if (user.Password !== password) {
+    console.error('Invalid password for email:', email);
+    return encodedRedirect('error', '/Error', 'Invalid email or password');
   }
 
-  console.log('User Logged In:', user); // ตรวจสอบว่าผู้ใช้ลงชื่อเข้าใช้สำเร็จหรือไม่
+  console.log('User Logged In:', user); // Successfully logged in
 
   const userRole = user.Role;
 
-  // เปลี่ยนเส้นทางตาม Role ของผู้ใช้
+  // Redirect based on user roles
   if (userRole === 'Admin') {
     return redirect('/protected/admin/dashboard');
   } else if (userRole === 'Instructor') {

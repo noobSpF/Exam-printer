@@ -2,58 +2,62 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
 export async function middleware(req: any) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  // const supabase = createClient(
+  //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  // );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // // Fetch the session
+  // const {
+  //   data: { session },
+  //   error: sessionError,
+  // } = await supabase.auth.getSession();
 
-  const url = req.nextUrl.clone();
+  // const url = req.nextUrl.clone();
 
-  // Redirect to /sign-in if the user is not authenticated and trying to access a protected route
-  if (!session && url.pathname !== '/sign-in') {
-    return NextResponse.redirect(new URL('/sign-in', req.url));
-  }
+  // // If no session is found and the user is not on the sign-in page, redirect to sign-in
+  // if (!session && url.pathname !== '/sign-in') {
+  //   console.log('No session found, redirecting to /sign-in');
+  //   return NextResponse.redirect(new URL('/sign-in', req.url));
+  // }
 
-  // If the user is authenticated, fetch the user's role
-  if (!session) {
-    return NextResponse.redirect(new URL('/sign-in', req.url));
-  }
+  // // If the user is authenticated, fetch their role from the Users table
+  // if (session) {
+  //   const { data: userRoleData, error: roleError } = await supabase
+  //     .from('Users') // Make sure your table is correctly named "Users"
+  //     .select('Role') // Use 'Role' if that’s the exact column name
+  //     .eq('UserKey', session.user.id) // Ensure this matches your primary key in the table
+  //     .single(); // Fetch a single row
 
-  const { data: userRoleData, error: roleError } = await supabase
-    .from('User')
-    .select('role')
-    .eq('id', session.user.id)
-    .single();
+  //   // If there’s an error fetching the role or no user found, redirect to error
+  //   if (roleError || !userRoleData) {
+  //     console.error('Role Fetch Error:', roleError?.message || 'No user found');
+  //     return NextResponse.redirect(new URL('/error', req.url));
+  //   }
 
-  if (roleError || !userRoleData) {
-    return NextResponse.redirect(new URL('/error', req.url));
-  }
+  //   const userRole = userRoleData.Role;
+  //   console.log('User role:', userRole);
 
-  const userRole = userRoleData.role;
-
-  // Redirect based on user roles
-  if (url.pathname.startsWith('/protected/admin') && userRole !== 'Admin') {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
-  }
-  if (
-    url.pathname.startsWith('/protected/instructor') &&
-    userRole !== 'Instructor'
-  ) {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
-  }
-  if (
-    url.pathname.startsWith('/protected/exam-officer') &&
-    userRole !== 'ExamOfficer'
-  ) {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
-  }
-  if (url.pathname.startsWith('/protected/tech') && userRole !== 'TechUnit') {
-    return NextResponse.redirect(new URL('/unauthorized', req.url));
-  }
+  //   // Redirect users based on their role
+  //   if (url.pathname.startsWith('/protected/admin') && userRole !== 'Admin') {
+  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
+  //   }
+  //   if (
+  //     url.pathname.startsWith('/protected/instructor') &&
+  //     userRole !== 'Instructor'
+  //   ) {
+  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
+  //   }
+  //   if (
+  //     url.pathname.startsWith('/protected/exam-officer') &&
+  //     userRole !== 'ExamOfficer'
+  //   ) {
+  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
+  //   }
+  //   if (url.pathname.startsWith('/protected/tech') && userRole !== 'TechUnit') {
+  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
+  //   }
+  // }
 
   return NextResponse.next();
 }

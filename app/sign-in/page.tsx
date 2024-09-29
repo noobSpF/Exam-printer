@@ -41,7 +41,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-row">
       {/* Left Side - Image */}
-      <div className="w-2/5 bg-gray-100 flex items-center justify-center">
+      <div className="w-2/5  flex items-center justify-center">
         <img
           src="/assets/login.png"
           alt="Login Illustration"
@@ -50,7 +50,7 @@ export default function Login() {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="w-3/5 flex items-center justify-center bg-grey">
+      <div className="w-3/5 flex items-center justify-center bg-gray-100">
         <div className="bg-white shadow-lg rounded-lg p-10 w-full max-w-lg lg:max-w-xl">
           <h1 className="text-3xl font-semibold mb-4 text-center text-purple-700">
             Exam printer
@@ -135,7 +135,7 @@ export default function Login() {
             {/* Submit Button */}
             <button
               type="submit"
-              className="bg-purple-600 text-white py-3 rounded-md text-center hover:bg-purple-700"
+              className="bg-purple-700 text-white py-3 rounded-md text-center hover:bg-purple-500"
             >
               Login
             </button>
