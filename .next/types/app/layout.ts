@@ -1,4 +1,4 @@
-// File: D:\develop\exam\Exam-printer\app\layout.tsx
+// File: C:\Users\Pesoniq\Desktop\TTRAX\new\Exam-printer\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

@@ -1,73 +1,78 @@
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { NextRequest, NextResponse } from "next/server";
 
-export async function middleware(req: any) {
-  // const supabase = createClient(
-  //   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  //   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  // );
+const MAX_REDIRECTS = 5;
+const rolePaths = {
+  Admin: ['/admin/dashBoard','/admin/addUser','/admin/editUser/[id]'],
+  Instructor: ['/instructor/dashBoard'],
+  ExamOfficer: ['/exam-officer/profile'],
+  TechUnit: ['/tech/dashBoard'],
+};
 
-  // // Fetch the session
-  // const {
-  //   data: { session },
-  //   error: sessionError,
-  // } = await supabase.auth.getSession();
+export async function middleware(request: NextRequest) {
+  console.log('Middleware called for path:', request.nextUrl.pathname);
 
-  // const url = req.nextUrl.clone();
+  const redirectCount = parseInt(request.headers.get('x-redirect-count') || '0');
+  console.log('Current redirect count:', redirectCount);
 
-  // // If no session is found and the user is not on the sign-in page, redirect to sign-in
-  // if (!session && url.pathname !== '/sign-in') {
-  //   console.log('No session found, redirecting to /sign-in');
-  //   return NextResponse.redirect(new URL('/sign-in', req.url));
-  // }
+  if (redirectCount >= MAX_REDIRECTS) {
+    console.log('Max redirects reached, going to error page');
+    return NextResponse.redirect(new URL("/error", request.url));
+  }
 
-  // // If the user is authenticated, fetch their role from the Users table
-  // if (session) {
-  //   const { data: userRoleData, error: roleError } = await supabase
-  //     .from('Users') // Make sure your table is correctly named "Users"
-  //     .select('Role') // Use 'Role' if that’s the exact column name
-  //     .eq('UserKey', session.user.id) // Ensure this matches your primary key in the table
-  //     .single(); // Fetch a single row
+  const userEmail = request.cookies.get('userEmail')?.value;
+  const userRole = request.cookies.get('role')?.value;
+  console.log('User email:', userEmail, 'User role:', userRole);
 
-  //   // If there’s an error fetching the role or no user found, redirect to error
-  //   if (roleError || !userRoleData) {
-  //     console.error('Role Fetch Error:', roleError?.message || 'No user found');
-  //     return NextResponse.redirect(new URL('/error', req.url));
-  //   }
+  // ไม่ต้องเช็คการ redirect สำหรับหน้า sign-in และ error
+  if (request.nextUrl.pathname === '/sign-in' || request.nextUrl.pathname === '/error') {
+    console.log('On sign-in or error page, no redirect');
+    return NextResponse.next();
+  }
 
-  //   const userRole = userRoleData.Role;
-  //   console.log('User role:', userRole);
+  if (!userEmail) {
+    console.log('No user email, redirecting to sign-in');
+    return NextResponse.redirect(new URL("/sign-in", request.url));
+  }
 
-  //   // Redirect users based on their role
-  //   if (url.pathname.startsWith('/protected/admin') && userRole !== 'Admin') {
-  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
-  //   }
-  //   if (
-  //     url.pathname.startsWith('/protected/instructor') &&
-  //     userRole !== 'Instructor'
-  //   ) {
-  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
-  //   }
-  //   if (
-  //     url.pathname.startsWith('/protected/exam-officer') &&
-  //     userRole !== 'ExamOfficer'
-  //   ) {
-  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
-  //   }
-  //   if (url.pathname.startsWith('/protected/tech') && userRole !== 'TechUnit') {
-  //     return NextResponse.redirect(new URL('/unauthorized', req.url));
-  //   }
-  // }
+  if (request.nextUrl.pathname.startsWith('/protected')) {
+    const redirectUrl = getRoleBasedRedirect(userRole, request.url);
+    if (redirectUrl) {
+      console.log('Redirecting to role-based URL:', redirectUrl.toString());
+      const newResponse = NextResponse.redirect(redirectUrl);
+      newResponse.headers.set('x-redirect-count', (redirectCount + 1).toString());
+      return newResponse;
+    }
+  }
 
+  // Check if the current path is valid for the user's role
+  const allowedPaths = rolePaths[userRole as keyof typeof rolePaths];
+  if (allowedPaths && !allowedPaths.includes(request.nextUrl.pathname)) {
+    console.log(`User role ${userRole} tried to access a restricted path, redirecting to default role path`);
+    const defaultRedirectUrl = new URL(allowedPaths[0], request.url);
+    const newResponse = NextResponse.redirect(defaultRedirectUrl);
+    newResponse.headers.set('x-redirect-count', (redirectCount + 1).toString());
+    return newResponse;
+  }
+
+  console.log('No redirect needed, proceeding to requested page');
   return NextResponse.next();
 }
 
+function getRoleBasedRedirect(role: string | undefined, baseUrl: string): URL | null {
+  switch (role) {
+    case 'Admin':
+      return new URL("/admin/dashBoard", baseUrl);
+    case 'Instructor':
+      return new URL("/instructor/dashBoard", baseUrl);
+    case 'ExamOfficer':
+      return new URL("/exam-officer/profile", baseUrl);
+    case 'TechUnit':
+      return new URL("/tech/dashBoard", baseUrl);
+    default:
+      return null;
+  }
+}
+
 export const config = {
-  matcher: [
-    '/protected/:path*',
-    '/admin/:path*',
-    '/exam-officer/:path*',
-    '/tech/:path*',
-    '/instructor/:path*',
-  ],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|assets).*)'],
 };

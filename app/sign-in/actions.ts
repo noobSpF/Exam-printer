@@ -1,51 +1,52 @@
 'use server';
 
-import { encodedRedirect } from '@/utils/utils';
 import { createClient } from '@/utils/supabase/server';
-import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
 
 export const signInAction = async (formData: FormData) => {
   const email = formData.get('email')?.toString();
   const password = formData.get('password')?.toString();
 
+  console.log('Sign-in attempt for email:', email);
+
   if (!email || !password) {
+    console.log('Email or password missing');
     return { error: 'Email and password are required' };
   }
 
   const supabase = createClient();
 
-  // Fetch the user by email
   const { data: user, error: userError } = await supabase
     .from('Users')
     .select('Email, Password, Role')
     .eq('Email', email)
-    .single(); // Make sure there’s only one user returned
+    .single();
 
   if (userError || !user) {
     console.error('Sign-In Query Error:', userError?.message);
-    return encodedRedirect('error', '/Error', 'Invalid email or password');
+    return { error: 'Invalid email or password' };
   }
 
-  // Check if the password matches
   if (user.Password !== password) {
     console.error('Invalid password for email:', email);
-    return encodedRedirect('error', '/Error', 'Invalid email or password');
+    return { error: 'Invalid email or password' };
   }
 
-  console.log('User Logged In:', user); // Successfully logged in
+  console.log('User authenticated successfully. Setting cookies...');
 
-  const userRole = user.Role;
+  // Set user role and email in cookies
+  cookies().set('role', user.Role, { 
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
+  cookies().set('userEmail', user.Email, { 
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict'
+  });
 
-  // Redirect based on user roles
-  if (userRole === 'Admin') {
-    return redirect('/protected/admin/dashboard');
-  } else if (userRole === 'Instructor') {
-    return redirect('/protected/instructor/dashboard');
-  } else if (userRole === 'ExamOfficer') {
-    return redirect('/protected/exam-officer/dashboard');
-  } else if (userRole === 'TechUnit') {
-    return redirect('/protected/tech/dashboard');
-  } else {
-    return encodedRedirect('error', '/Error', 'Invalid role');
-  }
+  console.log('Cookies set. User logged in:', { Email: user.Email, Role: user.Role });
+
+  return { success: true };
 };

@@ -1,4 +1,8 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/editUser/[id]/page": "app/editUser/[id]/page.js"
+  "/sign-in/page": "app/sign-in/page.js",
+  "/admin/dashBoard/page": "app/admin/dashBoard/page.js",
+  "/tech/dashBoard/page": "app/tech/dashBoard/page.js",
+  "/exam-officer/profile/page": "app/exam-officer/profile/page.js",
+  "/admin/addUser/page": "app/admin/addUser/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js"
 }
