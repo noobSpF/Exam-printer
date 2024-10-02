@@ -1,8 +1,4 @@
 {
-  "/sign-in/page": "app/sign-in/page.js",
-  "/admin/dashBoard/page": "app/admin/dashBoard/page.js",
-  "/tech/dashBoard/page": "app/tech/dashBoard/page.js",
-  "/exam-officer/profile/page": "app/exam-officer/profile/page.js",
-  "/admin/addUser/page": "app/admin/addUser/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/exam-officer/dashBoard/page": "app/exam-officer/dashBoard/page.js",
+  "/exam-officer/addSubject/page": "app/exam-officer/addSubject/page.js"
 }

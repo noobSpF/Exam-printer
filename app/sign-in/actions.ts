@@ -35,18 +35,21 @@ export const signInAction = async (formData: FormData) => {
   console.log('User authenticated successfully. Setting cookies...');
 
   // Set user role and email in cookies
-  cookies().set('role', user.Role, { 
-    httpOnly: true, 
+  cookies().set('role', user.Role, {
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    sameSite: 'strict',
   });
-  cookies().set('userEmail', user.Email, { 
-    httpOnly: true, 
+  cookies().set('userEmail', user.Email, {
+    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict'
+    sameSite: 'strict',
   });
 
-  console.log('Cookies set. User logged in:', { Email: user.Email, Role: user.Role });
+  console.log('Cookies set. User logged in:', {
+    Email: user.Email,
+    Role: user.Role,
+  });
 
   return { success: true };
 };
