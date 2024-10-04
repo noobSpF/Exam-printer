@@ -1,5 +1,46 @@
 {
-  "node": {},
+  "node": {
+    "425ff976156ba8750142ba4d3ecd431658db3908": {
+      "workers": {
+        "app/instructor/dashBoard/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
+        "app/instructor/addExam/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
+        "app/instructor/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/instructor/dashBoard/page": "action-browser",
+        "app/instructor/addExam/page": "action-browser",
+        "app/instructor/profile/page": "action-browser"
+      }
+    },
+    "f3c833f66728d7a36161f1f3f9589c426b681a6d": {
+      "workers": {
+        "app/instructor/dashBoard/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
+        "app/instructor/addExam/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
+        "app/instructor/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/instructor/dashBoard/page": "action-browser",
+        "app/instructor/addExam/page": "action-browser",
+        "app/instructor/profile/page": "action-browser"
+      }
+    },
+    "5e701e3ae21c0dcb14a448155569e4bc0528f9fa": {
+      "workers": {
+        "app/sign-in/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Capp%5C%5Csign-in%5C%5Cactions.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22signInAction%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/sign-in/page": "action-browser"
+      }
+    },
+    "a5b92ce90f1faf07a9f076faa07b5040f6c7f244": {
+      "workers": {
+        "app/sign-in/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Capp%5C%5Csign-in%5C%5Cactions.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22signInAction%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/sign-in/page": "action-browser"
+      }
+    }
+  },
   "edge": {},
-  "encryptionKey": "GuzRPiD37dXL5jJc1FLPudJjVP7eY/qFdrDj5dZwKdI="
+  "encryptionKey": "43yflzHVicF2vNXvimO0QNvX+DFVfJhCXQFdCwkIbfk="
 }

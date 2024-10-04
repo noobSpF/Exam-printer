@@ -22,13 +22,13 @@ export default function AddNewSubject() {
   const [studentAmount, setStudentAmount] = useState('');
   const [term, setTerm] = useState('Midterm');
   const [instructors, setInstructors] = useState<
-    {
-      UserID: any;
-      username: any;
-    }[]
+    { UserID: any; username: any }[]
   >([]); // For the list of instructors
   const [selectedInstructor, setSelectedInstructor] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [semester, setSemester] = useState('');
+
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Fetch instructors from the Users table
   useEffect(() => {
@@ -56,9 +56,11 @@ export default function AddNewSubject() {
     router.push('/exam-officer/profile'); // Navigate to Add User page
   };
 
-  // Handle Cancel button
-  const handleCancel = () => {
-    router.push('/exam-officer/dashboard'); // Navigate back to the dashboard
+  // Helper function to check if the due date is in the future
+  const isDueDateInFuture = (date: string) => {
+    const today = new Date();
+    const selectedDate = new Date(date);
+    return selectedDate > today; // Ensure the selected date is after today
   };
 
   // Handle Add Subject button
@@ -69,13 +71,20 @@ export default function AddNewSubject() {
       !subjectName ||
       !credit ||
       !major ||
+      !semester ||
       !section ||
       !studentAmount ||
       !term ||
       !selectedInstructor ||
       !dueDate
     ) {
-      alert('Please fill in all fields');
+      setErrorMessage('Please fill in all fields');
+      return;
+    }
+
+    // Validate if the due date is in the future
+    if (!isDueDateInFuture(dueDate)) {
+      setErrorMessage('Due date must be in the future.');
       return;
     }
 
@@ -95,6 +104,7 @@ export default function AddNewSubject() {
             Section: section, // Section
             StudentAmount: studentAmount, // Number of Students
             Term: term, // Midterm or Final
+
             Instructor: selectedInstructor, // Username of selected instructor
           },
         ]);
@@ -113,7 +123,8 @@ export default function AddNewSubject() {
           {
             SubID: subjectID, // Use the same SubID to link the Exam and Subject
             DueDate: formattedDueDate, // Formatted due date
-            Status: 'Not Submitted', // Set status as "Not Submitted"
+            Status: 'Not Submitted',
+            Semester: semester, // Set status as "Not Submitted"
           },
         ]);
 
@@ -131,6 +142,11 @@ export default function AddNewSubject() {
       console.error('Unexpected error:', err); // Log any unexpected errors
       alert('An unexpected error occurred. Please try again.');
     }
+  };
+
+  // Handle Cancel button
+  const handleCancel = () => {
+    router.push('/exam-officer/dashboard'); // Navigate back to the dashboard
   };
 
   return (
@@ -160,6 +176,9 @@ export default function AddNewSubject() {
         <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-center">
           Add new subject
         </h2>
+        {errorMessage && (
+          <p className="text-red-500 text-center mb-4">{errorMessage}</p>
+        )}
         <form>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4">
             {/* Subject Input */}
@@ -264,7 +283,7 @@ export default function AddNewSubject() {
                 onChange={(e) => setTerm(e.target.value)} // Capture selected term
               >
                 <option value="Midterm">Midterm</option>
-                <option value="Final">Final</option>
+                <option value="Finalterm">Finalterm</option>
               </select>
             </div>
 
@@ -284,6 +303,18 @@ export default function AddNewSubject() {
                 ))}
               </select>
             </div>
+            {/* Semester Input */}
+            <div className="flex flex-col">
+              <label className="text-gray-600">Semester</label>
+              <select
+                className="border p-2 rounded-lg"
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)} // Capture selected term
+              >
+                <option value="">Select Semester</option>
+                <option value="1/2567">1/2567</option>
+              </select>
+            </div>
 
             {/* Due Date Input */}
             <div className="flex flex-col">
@@ -298,17 +329,17 @@ export default function AddNewSubject() {
           </div>
 
           {/* Buttons */}
-          <div className="flex justify-center space-x-4 mt-4">
+          <div className="flex justify-center space-x-4 mt-12">
             <button
               type="button"
-              className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-300"
+              className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-300 mr-4"
               onClick={handleCancel}
             >
               Cancel
             </button>
             <button
               type="button"
-              className="bg-blue-500 text-white px-6 py-3 rounded-lg focus:outline-none hover:bg-blue-300"
+              className="bg-blue-500 text-white px-6 py-3 rounded-lg focus:outline-none hover:bg-blue-300 ml-4"
               onClick={handleAddSubject}
             >
               Add Subject

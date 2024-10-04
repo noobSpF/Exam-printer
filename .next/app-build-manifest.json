@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/exam-officer/dashBoard/page": [
+    "/instructor/dashBoard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/exam-officer/dashBoard/page.js"
+      "static/chunks/app/instructor/dashBoard/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -11,10 +11,25 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/exam-officer/addSubject/page": [
+    "/instructor/addExam/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/exam-officer/addSubject/page.js"
+      "static/chunks/app/instructor/addExam/page.js"
+    ],
+    "/instructor/profile/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/instructor/profile/page.js"
+    ],
+    "/sign-in/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/sign-in/page.js"
+    ],
+    "/exam-officer/dashBoard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/exam-officer/dashBoard/page.js"
     ]
   }
 }

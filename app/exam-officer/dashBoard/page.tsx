@@ -69,22 +69,35 @@ export default function ExamOfficerPage() {
   // Function to handle subject deletion
   const handleDeleteSubject = async (subjectId: string) => {
     const confirmDelete = window.confirm(
-      'Are you sure you want to delete this subject?'
+      'Are you sure you want to delete this subject and all related exam data?'
     );
 
     if (!confirmDelete) return;
 
     try {
-      const { error } = await supabase
+      // Delete related exams from the 'Exam' table
+      const { error: examError } = await supabase
+        .from('Exam')
+        .delete()
+        .eq('SubID', subjectId);
+
+      if (examError) {
+        console.error('Error deleting related exams:', examError);
+        alert('Failed to delete related exams. Please try again.');
+        return;
+      }
+
+      // Delete the subject from the 'Subject' table
+      const { error: subjectError } = await supabase
         .from('Subject')
         .delete()
-        .eq('SubID', subjectId); // Delete subject by ID
+        .eq('SubID', subjectId);
 
-      if (error) {
-        console.error('Error deleting subject:', error);
+      if (subjectError) {
+        console.error('Error deleting subject:', subjectError);
         alert('Failed to delete subject. Please try again.');
       } else {
-        alert('Subject deleted successfully.');
+        alert('Subject and related exams deleted successfully.');
         setExams((prevExams) =>
           prevExams.filter((exam) => exam.Subject !== subjectId)
         );
@@ -264,8 +277,15 @@ export default function ExamOfficerPage() {
                         {`${exam.Subject} ${exam.Subjectname}`}
                       </td>
                       <td className="py-2 px-4 text-center">
-                        <button className="bg-blue-500 text-white px-4 rounded-lg">
-                          exam
+                        <button
+                          className={`px-4 rounded-lg ${
+                            exam.Status === 'Not Submitted'
+                              ? 'bg-gray-500 text-white cursor-not-allowed' // Gray button for "Not Submitted" status
+                              : 'bg-blue-500 text-white  cursor-not-allowed' // Blue button for other statuses
+                          }`}
+                          disabled={exam.Status === 'Not Submitted'} // Disable button when status is "Not Submitted"
+                        >
+                          Exam
                         </button>
                       </td>
                       <td className="py-2 px-4 text-center">{exam.Term}</td>

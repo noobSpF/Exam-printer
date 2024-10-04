@@ -50,6 +50,7 @@ export default function AdminDashboard() {
     router.push('/admin/addUser'); // Navigate to Add User page
   };
   const handleEditUser = (userId: number) => {
+    console.log('Redirecting to edit user with ID:', userId);
     router.push(`/admin/editUser/${userId}`);
   };
 
