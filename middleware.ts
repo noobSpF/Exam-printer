@@ -15,7 +15,13 @@ const rolePaths = {
     '/exam-officer/addSubject',
     '/exam-officer/backupExam',
   ],
-  TechUnit: ['/tech/dashBoard', '/tech/profile'],
+  TechUnit: [
+    '/tech/dashBoard',
+    '/tech/profile',
+    '/tech/reviewExam',
+    '/tech/printExam',
+    '/tech/viewExam',
+  ],
 };
 
 export async function middleware(request: NextRequest) {

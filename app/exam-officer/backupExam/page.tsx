@@ -11,18 +11,17 @@ const supabase = createClient(
 );
 
 // Define types for your data
-interface ExamData {
+interface BackupData {
   Subject: string;
   Subjectname: string;
   Term: string;
   DueDate: string;
   Instructor: string;
   Status: string;
-  AmountStudent: number;
 }
 
 export default function ExamOfficerPage() {
-  const [exams, setExams] = useState<ExamData[]>([]);
+  const [exams, setExams] = useState<BackupData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   // Filter states
@@ -39,7 +38,7 @@ export default function ExamOfficerPage() {
   useEffect(() => {
     const fetchExams = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_exam_details'); // Fetch data from your 'Exam' table
+        const { data, error } = await supabase.from('Backup').select('*'); // Fetch data from your 'Exam' table
 
         if (error) {
           console.error('Error fetching exams:', error);
@@ -51,7 +50,6 @@ export default function ExamOfficerPage() {
             DueDate: exam.DueDate, // Format date
             Instructor: exam.Instructor, // Assuming Instructor field holds the name
             Status: exam.Status, // Custom logic for status
-            AmountStudent: exam.AmountStudent,
           }));
           setExams(transformedExams);
         }
@@ -101,7 +99,7 @@ export default function ExamOfficerPage() {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-grow flex flex-col px-6 py-4">
+      <div className="flex-grow flex flex-col">
         <div className="flex flex-col lg:flex-row justify-between items-center p-4 bg-gray-100">
           <h3 className="text-lg lg:text-xl mt-1 text-center lg:text-left">
             Exam printer ระบบจัดพิมพ์ข้อสอบ <br />
@@ -221,19 +219,21 @@ export default function ExamOfficerPage() {
                 <tbody>
                   {exams.map((exam, index) => (
                     <tr key={index}>
-                      <td className="py-2 px-4">
+                      <td className="py-2 px-4 text-center">
                         {`${exam.Subject} ${exam.Subjectname}`}
                       </td>
-                      <td className="py-2 px-4">
+                      <td className="py-2 px-4 text-center">
                         <button className="bg-blue-500 text-white px-4  rounded-lg">
                           exam
                         </button>
                       </td>
-                      <td className="py-2 px-4">{exam.Term}</td>
-                      <td className="py-2 px-4">{exam.DueDate}</td>
-                      <td className="py-2 px-4">{exam.Instructor}</td>
+                      <td className="py-2 px-4 text-center">{exam.Term}</td>
+                      <td className="py-2 px-4 text-center">{exam.DueDate}</td>
+                      <td className="py-2 px-4 text-center">
+                        {exam.Instructor}
+                      </td>
                       <td
-                        className={`py-2 px-4 ${
+                        className={`py-2 px-4 text-center ${
                           exam.Status === 'Not Submitted'
                             ? 'text-red-500'
                             : exam.Status === 'Printed'
@@ -242,7 +242,9 @@ export default function ExamOfficerPage() {
                                 ? 'text-blue-500'
                                 : exam.Status === 'Issue'
                                   ? 'text-yellow-500'
-                                  : 'text-gray-500'
+                                  : exam.Status === 'Backed up'
+                                    ? 'text-purple-600'
+                                    : 'text-gray-500'
                         }`}
                       >
                         {exam.Status}

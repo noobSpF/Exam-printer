@@ -132,9 +132,71 @@ export default function InstructorPage() {
     router.push('/instructor/profile'); // Navigate to Add User page
   };
 
-  const handleApplyFilters = () => {
-    // TODO: Apply filters to the fetched data
-    // You can use the states like `subject`, `term`, `dueDate`, `status`, and `instructor` to filter the data
+  const handleApplyFilters = async () => {
+    try {
+      setLoading(true); // Start loading state
+
+      // Build the query dynamically based on the filter values
+      let query = supabase.from('Subject').select(
+        `
+          SubID, 
+          SubName, 
+          Term, 
+          Instructor, 
+          StudentAmount,
+          Exam(DueDate, Status)
+        `
+      );
+
+      // Apply filters based on selected values
+      if (subject !== 'All subject') {
+        query = query.eq('SubID', subject);
+      }
+      if (term !== 'All term') {
+        query = query.eq('Term', term);
+      }
+      if (dueDate) {
+        query = query.eq('Exam.DueDate', dueDate); // Assuming DueDate is stored in the Exam table
+      }
+      if (status !== 'All status') {
+        query = query.eq('Exam.Status', status); // Assuming Status is in the Exam table
+      }
+      if (instructor !== 'All instructor') {
+        query = query.eq('Instructor', instructor);
+      }
+
+      // Execute the query
+      const { data: subjectData, error: subjectError } = await query;
+
+      if (subjectError) {
+        console.error('Error fetching filtered subjects:', subjectError);
+        setError('Error fetching filtered subjects.');
+        setLoading(false);
+        return;
+      }
+
+      // Transform data similar to initial fetch
+      const transformedData = await Promise.all(
+        subjectData.map(async (subject: any) => {
+          return {
+            SubID: subject.SubID,
+            SubName: subject.SubName,
+            Term: subject.Term,
+            Instructor: subject.Instructor,
+            StudentAmount: subject.StudentAmount,
+            DueDate: subject.Exam?.DueDate || 'No due date', // Handle missing due dates
+            Status: subject.Exam?.Status || 'No status', // Handle missing statuses
+          };
+        })
+      );
+
+      setSubjects(transformedData); // Update state with filtered data
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      setError('An unexpected error occurred.');
+    } finally {
+      setLoading(false); // Stop loading state
+    }
   };
 
   return (
@@ -189,7 +251,12 @@ export default function InstructorPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               >
-                <option>All subject</option>
+                <option value="All subject">All subject</option>
+                {subjects.map((subj) => (
+                  <option key={subj.SubID} value={subj.SubID}>
+                    {`${subj.SubID} - ${subj.SubName}`}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Term Filter */}
@@ -202,7 +269,7 @@ export default function InstructorPage() {
               >
                 <option>All term</option>
                 <option>Midterm</option>
-                <option>Final</option>
+                <option>Finalterm</option>
               </select>
             </div>
             {/* Due Date Filter */}
@@ -271,10 +338,17 @@ export default function InstructorPage() {
                       <td className="py-2 px-4 text-center">
                         <button
                           className={`px-4 rounded-lg ${
-                            subject.Status === 'Not Submitted'
-                              ? 'bg-gray-500 text-white' // Gray button for "Not Submitted" status
-                              : 'bg-blue-500 text-white hover:bg-blue-700' // Blue button for other statuses
+                            subject.Status === 'Not Submitted' ||
+                            subject.Status === 'Submitted' ||
+                            subject.Status === 'Issue'
+                              ? 'bg-blue-500 text-white hover:bg-blue-700'
+                              : 'bg-gray-500 text-white cursor-not-allowed'
                           }`}
+                          disabled={
+                            subject.Status !== 'Not Submitted' &&
+                            subject.Status !== 'Submitted' &&
+                            subject.Status !== 'Issue'
+                          }
                           onClick={() =>
                             router.push(
                               `/instructor/addExam?subId=${subject.SubID}`
@@ -304,10 +378,12 @@ export default function InstructorPage() {
                             : subject.Status === 'Printed'
                               ? 'text-green-500'
                               : subject.Status === 'Submitted'
-                                ? 'text-blue-500'
+                                ? 'text-cyan-500'
                                 : subject.Status === 'Issue'
                                   ? 'text-yellow-500'
-                                  : 'text-gray-500'
+                                  : subject.Status === 'Ready to print'
+                                    ? 'text-blue-600'
+                                    : 'text-gray-500'
                         }`}
                       >
                         {subject.Status}

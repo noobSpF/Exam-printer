@@ -1,9 +1,7 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
+  "/admin/dashBoard/page": "app/admin/dashBoard/page.js",
   "/instructor/dashBoard/page": "app/instructor/dashBoard/page.js",
-  "/instructor/addExam/page": "app/instructor/addExam/page.js",
-  "/instructor/profile/page": "app/instructor/profile/page.js",
-  "/sign-in/page": "app/sign-in/page.js",
   "/exam-officer/dashBoard/page": "app/exam-officer/dashBoard/page.js",
-  "/favicon.ico/route": "app/favicon.ico/route.js"
+  "/tech/printExam/page": "app/tech/printExam/page.js",
+  "/exam-officer/backupExam/page": "app/exam-officer/backupExam/page.js"
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { AiOutlineDelete } from 'react-icons/ai'; // Import delete icon
-
+import { AiOutlineCloudUpload } from 'react-icons/ai';
 // Supabase client creation
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -119,6 +119,59 @@ export default function ExamOfficerPage() {
   const handleApplyFilters = () => {
     // TODO: Apply filters to the fetched data
     // You can use the states like `subject`, `term`, `dueDate`, `status`, and `instructor` to filter the data
+  };
+  const handleBackup = async (exam: ExamData) => {
+    const confirmBackup = window.confirm(
+      'Are you sure you want to back up this exam and remove it from the system?'
+    );
+
+    if (!confirmBackup) return;
+
+    try {
+      // Update the exam status to 'Backed up'
+      const { error: updateError } = await supabase
+        .from('Exam')
+        .update({ Status: 'Backed up' })
+        .eq('SubID', exam.Subject);
+
+      if (updateError) {
+        console.error('Error backing up exam:', updateError);
+        alert('Failed to back up the exam. Please try again.');
+        return;
+      }
+
+      // Optionally, delete the exam and subject after backing up
+      const { error: deleteExamError } = await supabase
+        .from('Exam')
+        .delete()
+        .eq('SubID', exam.Subject);
+
+      const { error: deleteSubjectError } = await supabase
+        .from('Subject')
+        .delete()
+        .eq('SubID', exam.Subject);
+
+      if (deleteExamError || deleteSubjectError) {
+        console.error(
+          'Error deleting exam/subject:',
+          deleteExamError || deleteSubjectError
+        );
+        alert(
+          'Failed to delete exam or subject after backup. Please try again.'
+        );
+        return;
+      }
+
+      alert('Exam successfully backed up and removed.');
+
+      // Remove the backed-up exam from the displayed list
+      setExams((prevExams) =>
+        prevExams.filter((e) => e.Subject !== exam.Subject)
+      );
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      alert('An unexpected error occurred while backing up the exam.');
+    }
   };
 
   return (
@@ -260,6 +313,7 @@ export default function ExamOfficerPage() {
                     <th className="py-2 px-4">Instructor</th>
                     <th className="py-2 px-4">Status</th>
                     <th className="py-2 px-4">Action</th>
+                    <th className="py-2 px-4">Backup</th>
                   </tr>
                 </thead>
                 <td colSpan={12} className="text-center py-4">
@@ -271,53 +325,71 @@ export default function ExamOfficerPage() {
                   </button>
                 </td>
                 <tbody>
-                  {exams.map((exam, index) => (
-                    <tr key={index}>
-                      <td className="py-2 px-4 text-center">
-                        {`${exam.Subject} ${exam.Subjectname}`}
-                      </td>
-                      <td className="py-2 px-4 text-center">
-                        <button
-                          className={`px-4 rounded-lg ${
+                  {exams
+                    .filter((exam) => exam.Status !== 'Backed up') // Exclude exams with "Backed up" status
+                    .map((exam, index) => (
+                      <tr key={index}>
+                        <td className="py-2 px-4 text-center">
+                          {`${exam.Subject} ${exam.Subjectname}`}
+                        </td>
+                        <td className="py-2 px-4 text-center">
+                          <button
+                            className={`px-4 rounded-lg ${
+                              exam.Status === 'Not Submitted'
+                                ? 'bg-gray-500 text-white cursor-not-allowed' // Gray button for "Not Submitted" status
+                                : 'bg-blue-500 text-white  cursor-not-allowed' // Blue button for other statuses
+                            }`}
+                            disabled={exam.Status === 'Not Submitted'} // Disable button when status is "Not Submitted"
+                          >
+                            Exam
+                          </button>
+                        </td>
+                        <td className="py-2 px-4 text-center">{exam.Term}</td>
+                        <td className="py-2 px-4 text-center">
+                          {exam.DueDate}
+                        </td>
+                        <td className="py-2 px-4 text-center">
+                          {exam.Instructor}
+                        </td>
+                        <td
+                          className={`py-2 px-4 text-center ${
                             exam.Status === 'Not Submitted'
-                              ? 'bg-gray-500 text-white cursor-not-allowed' // Gray button for "Not Submitted" status
-                              : 'bg-blue-500 text-white  cursor-not-allowed' // Blue button for other statuses
+                              ? 'text-red-500'
+                              : exam.Status === 'Printed'
+                                ? 'text-green-500'
+                                : exam.Status === 'Submitted'
+                                  ? 'text-cyan-500'
+                                  : exam.Status === 'Issue'
+                                    ? 'text-yellow-500'
+                                    : exam.Status === 'Ready to print'
+                                      ? 'text-blue-600'
+                                      : exam.Status === 'Backed up'
+                                        ? 'text-purple-600'
+                                        : 'text-gray-500'
                           }`}
-                          disabled={exam.Status === 'Not Submitted'} // Disable button when status is "Not Submitted"
                         >
-                          Exam
-                        </button>
-                      </td>
-                      <td className="py-2 px-4 text-center">{exam.Term}</td>
-                      <td className="py-2 px-4 text-center">{exam.DueDate}</td>
-                      <td className="py-2 px-4 text-center">
-                        {exam.Instructor}
-                      </td>
-                      <td
-                        className={`py-2 px-4 text-center ${
-                          exam.Status === 'Not Submitted'
-                            ? 'text-red-500'
-                            : exam.Status === 'Printed'
-                              ? 'text-green-500'
-                              : exam.Status === 'Submitted'
-                                ? 'text-blue-500'
-                                : exam.Status === 'Issue'
-                                  ? 'text-yellow-500'
-                                  : 'text-gray-500'
-                        }`}
-                      >
-                        {exam.Status}
-                      </td>
-                      <td className="py-2 px-4 text-center">
-                        <button
-                          className="text-red-400 hover:text-red-700"
-                          onClick={() => handleDeleteSubject(exam.Subject)}
-                        >
-                          <AiOutlineDelete size={20} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          {exam.Status}
+                        </td>
+                        <td className="py-2 px-4 text-center">
+                          <button
+                            className="text-red-400 hover:text-red-700"
+                            onClick={() => handleDeleteSubject(exam.Subject)}
+                          >
+                            <AiOutlineDelete size={20} />
+                          </button>
+                        </td>
+                        <td className="py-2 px-4 text-center">
+                          {exam.Status === 'Printed' && (
+                            <button
+                              className="text-blue-500 hover:text-blue-700 mr-4"
+                              onClick={() => handleBackup(exam)}
+                            >
+                              <AiOutlineCloudUpload size={20} /> Back up
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             </div>

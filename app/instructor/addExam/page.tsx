@@ -122,7 +122,7 @@ export default function AddExamPage() {
       const fetchSubjectData = async () => {
         const { data, error } = await supabase
           .from('Subject')
-          .select('SubID, SubName, Section, Major, Credit')
+          .select('SubID, SubName, Section, Major, Credit,StudentAmount')
           .eq('SubID', subId)
           .single();
 
@@ -136,6 +136,7 @@ export default function AddExamPage() {
             section: data.Section,
             major: data.Major,
             credit: data.Credit,
+            numStudents: data.StudentAmount,
           }));
         }
       };
@@ -157,9 +158,12 @@ export default function AddExamPage() {
     // Handle file upload if a file is attached
     if (formData.attachment) {
       const file = formData.attachment;
+      const filename = `${file.name}`;
+      console.log('Uploading file:', filename); // Debugging log
+
       const { data, error } = await supabase.storage
         .from('exam-files')
-        .upload(`exams/${file.name}`, file, {
+        .upload(filename, file, {
           cacheControl: '3600',
           upsert: false,
         });
@@ -171,6 +175,7 @@ export default function AddExamPage() {
       }
 
       attachmentUrl = data.path;
+      console.log('File uploaded successfully:', attachmentUrl); // Debugging log
     }
 
     // Check if the exam already exists based on SubID
@@ -426,6 +431,16 @@ export default function AddExamPage() {
                 readOnly
               />
             </div>
+            <div>
+              <label className="block text-gray-700">จำนวนนักศึกษา</label>
+              <input
+                type="text"
+                name="numStudents"
+                value={formData.numStudents} // Filled with profile phone number
+                className="w-full p-2 border rounded"
+                readOnly
+              />
+            </div>
 
             <div>
               <label className="block text-gray-700">ห้องทำงาน</label>
@@ -517,7 +532,6 @@ export default function AddExamPage() {
               type="file"
               onChange={handleFileChange}
               className="w-full p-2 border rounded"
-              accept="application/pdf"
             />
             <p className="text-gray-600 text-sm mt-1">
               Maximum file size: 50MB | Type of file: Pdf

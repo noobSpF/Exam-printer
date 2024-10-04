@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
 import { AiOutlineDelete } from 'react-icons/ai'; // Import delete icon
-
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
 // Supabase client creation
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,6 +21,12 @@ interface ExamData {
   Instructor: string;
   Status: string;
   AmountStudent: number;
+  ExamID: string; // Add ExamID property
+}
+interface SubjectData {
+  SubID: string;
+  SubName: string;
+  Instructor: string;
 }
 
 export default function TechUnitPage() {
@@ -34,8 +41,10 @@ export default function TechUnitPage() {
   const [status, setStatus] = useState<string>('All status');
   const [instructor, setInstructor] = useState<string>('All instructor');
 
+  const [subjects, setSubjects] = useState<SubjectData[]>([]);
   const router = useRouter();
 
+  // Fetch exam data
   // Fetch exam data
   useEffect(() => {
     const fetchExams = async () => {
@@ -45,6 +54,7 @@ export default function TechUnitPage() {
         if (error) {
           console.error('Error fetching exams:', error);
         } else {
+          console.log('Exam data:', data); // Log the fetched data
           const transformedExams = data.map((exam: any) => ({
             Subject: exam.SubID,
             Subjectname: exam.SubName, // Assuming SubID holds the subject identifier
@@ -53,6 +63,7 @@ export default function TechUnitPage() {
             Instructor: exam.Instructor, // Assuming Instructor field holds the name
             Status: exam.Status, // Custom logic for status
             AmountStudent: exam.AmountStudent,
+            ExamID: exam.ExamID, // Ensure ExamID is being fetched
           }));
           setExams(transformedExams);
         }
@@ -66,61 +77,94 @@ export default function TechUnitPage() {
     fetchExams();
   }, []);
 
-  // Function to handle subject deletion
-  const handleDeleteSubject = async (subjectId: string) => {
-    const confirmDelete = window.confirm(
-      'Are you sure you want to delete this subject and all related exam data?'
-    );
+  const handleProfile = () => {
+    router.push('/tech/profile'); // Navigate to Add User page
+  };
+  const handlePrintExam = () => {
+    router.push('/tech/printExam'); // Navigate to backup exam page
+  };
+  //TODO
+  const handleApplyFilters = () => {
+    // Create a filter object based on current state
+    const filters = {
+      subject,
+      term,
+      dueDate,
+      status,
+      instructor,
+    };
 
-    if (!confirmDelete) return;
-
+    // Fetch exams based on filters
+    fetchExams(filters);
+  };
+  const fetchExams = async (filters: any = {}) => {
     try {
-      // Delete related exams from the 'Exam' table
-      const { error: examError } = await supabase
-        .from('Exam')
-        .delete()
-        .eq('SubID', subjectId);
+      // Initial query
+      let query = supabase.rpc('get_exam_details');
 
-      if (examError) {
-        console.error('Error deleting related exams:', examError);
-        alert('Failed to delete related exams. Please try again.');
-        return;
+      // Apply filters
+      if (filters.subject && filters.subject !== 'All subject') {
+        query = query.eq('SubID', filters.subject);
+      }
+      if (filters.term && filters.term !== 'All term') {
+        query = query.eq('Term', filters.term);
+      }
+      if (filters.dueDate) {
+        query = query.eq('DueDate', filters.dueDate);
+      }
+      if (filters.status && filters.status !== 'All status') {
+        query = query.eq('Status', filters.status);
+      }
+      if (filters.instructor && filters.instructor !== 'All instructor') {
+        query = query.eq('Instructor', filters.instructor);
       }
 
-      // Delete the subject from the 'Subject' table
-      const { error: subjectError } = await supabase
-        .from('Subject')
-        .delete()
-        .eq('SubID', subjectId);
+      // Fetch data with applied filters
+      const { data, error } = await query;
 
-      if (subjectError) {
-        console.error('Error deleting subject:', subjectError);
-        alert('Failed to delete subject. Please try again.');
+      if (error) {
+        console.error('Error fetching exams:', error);
       } else {
-        alert('Subject and related exams deleted successfully.');
-        setExams((prevExams) =>
-          prevExams.filter((exam) => exam.Subject !== subjectId)
-        );
+        const transformedExams = data.map((exam: any) => ({
+          Subject: exam.SubID,
+          Subjectname: exam.SubName,
+          Term: exam.Term,
+          DueDate: exam.DueDate,
+          Instructor: exam.Instructor,
+          Status: exam.Status,
+          AmountStudent: exam.AmountStudent,
+          ExamID: exam.ExamID,
+        }));
+        setExams(transformedExams);
       }
     } catch (err) {
       console.error('Unexpected error:', err);
-      alert('An unexpected error occurred while deleting the subject.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleProfile = () => {
-    router.push('/exam-officer/profile'); // Navigate to Add User page
-  };
-  const handleBackupExam = () => {
-    router.push('/exam-officer/backupExam'); // Navigate to backup exam page
-  };
+  // Fetch subjects and instructors from the Subject table
+  useEffect(() => {
+    const fetchSubjectsAndInstructors = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('Subject')
+          .select('SubID, SubName, Instructor');
 
-  // Handle filter application
-  const handleApplyFilters = () => {
-    // TODO: Apply filters to the fetched data
-    // You can use the states like `subject`, `term`, `dueDate`, `status`, and `instructor` to filter the data
-  };
+        if (error) {
+          console.error('Error fetching subjects and instructors:', error);
+        } else {
+          setSubjects(data); // Store fetched subjects
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+    };
 
+    fetchSubjectsAndInstructors();
+  }, []);
+  //TODO
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}
@@ -135,9 +179,9 @@ export default function TechUnitPage() {
             </li>
             <li
               className="text-xl px-4 py-2 text-center cursor-pointer hover:bg-gray-600"
-              onClick={handleBackupExam}
+              onClick={handlePrintExam}
             >
-              Backup exam
+              Print exam
             </li>
           </ul>
         </nav>
@@ -164,7 +208,6 @@ export default function TechUnitPage() {
             </button>
           </div>
         </div>
-
         {/* Filter Section */}
         <div className="p-6 bg-white border-b">
           <h2 className="text-2xl font-bold mb-4 text-center lg:text-left">
@@ -179,7 +222,12 @@ export default function TechUnitPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               >
-                <option>All subject</option>
+                <option value="All subject">All subject</option>
+                {subjects.map((subj) => (
+                  <option key={subj.SubID} value={subj.SubID}>
+                    {subj.SubID} - {subj.SubName}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Term Filter */}
@@ -192,7 +240,7 @@ export default function TechUnitPage() {
               >
                 <option>All term</option>
                 <option>Midterm</option>
-                <option>Final</option>
+                <option>Finalterm</option>
               </select>
             </div>
             {/* Due Date Filter */}
@@ -229,9 +277,17 @@ export default function TechUnitPage() {
                 value={instructor}
                 onChange={(e) => setInstructor(e.target.value)}
               >
-                <option>All instructor</option>
+                <option value="All instructor">All instructor</option>
+                {Array.from(
+                  new Set(subjects.map((subj) => subj.Instructor))
+                ).map((instructor) => (
+                  <option key={instructor} value={instructor}>
+                    {instructor}
+                  </option>
+                ))}
               </select>
             </div>
+
             {/* Apply Button */}
             <div className="flex flex-col justify-end">
               <button
@@ -243,7 +299,6 @@ export default function TechUnitPage() {
             </div>
           </div>
         </div>
-
         {/* Table Section */}
         <main className=" bg-gray-100 flex-grow">
           {loading ? (
@@ -259,17 +314,9 @@ export default function TechUnitPage() {
                     <th className="py-2 px-4">Due Date</th>
                     <th className="py-2 px-4">Instructor</th>
                     <th className="py-2 px-4">Status</th>
-                    <th className="py-2 px-4">Action</th>
                   </tr>
                 </thead>
-                <td colSpan={12} className="text-center py-4">
-                  <button
-                    className="border-2 border-dashed border-gray-400 px-6 py-2 rounded-lg text-gray-500"
-                    onClick={() => router.push('/exam-officer/addSubject')} // Navigate to the Add Subject page
-                  >
-                    + Add Subject
-                  </button>
-                </td>
+
                 <tbody>
                   {exams.map((exam, index) => (
                     <tr key={index}>
@@ -279,15 +326,41 @@ export default function TechUnitPage() {
                       <td className="py-2 px-4 text-center">
                         <button
                           className={`px-4 rounded-lg ${
-                            exam.Status === 'Not Submitted'
-                              ? 'bg-gray-500 text-white cursor-not-allowed' // Gray button for "Not Submitted" status
-                              : 'bg-blue-500 text-white hover:bg-blue-700 cursor-not-allowed' // Blue button for other statuses
+                            exam.Status !== 'Submitted'
+                              ? 'bg-gray-500 text-white cursor-not-allowed' // Gray button for statuses other than "Submitted"
+                              : 'bg-blue-500 text-white hover:bg-blue-700' // Blue button for "Submitted" status
                           }`}
-                          disabled={exam.Status === 'Not Submitted'} // Disable button when status is "Not Submitted"
+                          disabled={exam.Status !== 'Submitted'} // Disable button when status is not "Submitted"
+                          onClick={async () => {
+                            if (exam.Status !== 'Submitted') {
+                              return; // Prevent click event if the status is not "Submitted"
+                            }
+
+                            // Fetch the ExamID using the SubID
+                            const { data, error } = await supabase
+                              .from('Exam')
+                              .select('ExamID')
+                              .eq('SubID', exam.Subject) // Assuming exam.Subject is the SubID
+                              .single(); // Fetch a single exam record
+
+                            if (error || !data) {
+                              console.error('Error fetching ExamID:', error);
+                              return;
+                            }
+
+                            const examID = data.ExamID;
+
+                            // Navigate to the reviewExam page with the fetched ExamID
+                            router.push(`/tech/reviewExam?examId=${examID}`);
+                          }}
                         >
+                          {exam.Status === 'Submitted' && (
+                            <FontAwesomeIcon icon={faEye} className="mr-2" />
+                          )}
                           Exam
                         </button>
                       </td>
+
                       <td className="py-2 px-4 text-center">{exam.Term}</td>
                       <td className="py-2 px-4 text-center">{exam.DueDate}</td>
                       <td className="py-2 px-4 text-center">
@@ -300,21 +373,15 @@ export default function TechUnitPage() {
                             : exam.Status === 'Printed'
                               ? 'text-green-500'
                               : exam.Status === 'Submitted'
-                                ? 'text-blue-500'
+                                ? 'text-cyan-500'
                                 : exam.Status === 'Issue'
                                   ? 'text-yellow-500'
-                                  : 'text-gray-500'
+                                  : exam.Status === 'Ready to print'
+                                    ? 'text-blue-600'
+                                    : 'text-gray-500'
                         }`}
                       >
                         {exam.Status}
-                      </td>
-                      <td className="py-2 px-4 text-center">
-                        <button
-                          className="text-red-400 hover:text-red-700"
-                          onClick={() => handleDeleteSubject(exam.Subject)}
-                        >
-                          <AiOutlineDelete size={20} />
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -322,7 +389,7 @@ export default function TechUnitPage() {
               </table>
             </div>
           )}
-        </main>
+        </main>{' '}
       </div>
     </div>
   );

@@ -2,11 +2,15 @@
   "node": {
     "425ff976156ba8750142ba4d3ecd431658db3908": {
       "workers": {
+        "app/exam-officer/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
+        "app/tech/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
         "app/instructor/dashBoard/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
         "app/instructor/addExam/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
         "app/instructor/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!"
       },
       "layer": {
+        "app/exam-officer/profile/page": "action-browser",
+        "app/tech/profile/page": "action-browser",
         "app/instructor/dashBoard/page": "action-browser",
         "app/instructor/addExam/page": "action-browser",
         "app/instructor/profile/page": "action-browser"
@@ -14,11 +18,15 @@
     },
     "f3c833f66728d7a36161f1f3f9589c426b681a6d": {
       "workers": {
+        "app/exam-officer/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
+        "app/tech/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
         "app/instructor/dashBoard/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
         "app/instructor/addExam/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!",
         "app/instructor/profile/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22D%3A%5C%5Cdevelop%5C%5Cexam2%5C%5CExam-printer%5C%5Cutils%5C%5Ccookies%5C%5CcookieUtils.ts%22%2C%5B%22%24%24ACTION_0%22%2C%22getUserEmailFromCookies%22%5D%5D%5D&__client_imported__=true!"
       },
       "layer": {
+        "app/exam-officer/profile/page": "action-browser",
+        "app/tech/profile/page": "action-browser",
         "app/instructor/dashBoard/page": "action-browser",
         "app/instructor/addExam/page": "action-browser",
         "app/instructor/profile/page": "action-browser"
@@ -42,5 +50,5 @@
     }
   },
   "edge": {},
-  "encryptionKey": "43yflzHVicF2vNXvimO0QNvX+DFVfJhCXQFdCwkIbfk="
+  "encryptionKey": "YuytOI8dqDIdCCOPh8RKFMyPq4QuFV0HE2tFLfd6cPE="
 }
