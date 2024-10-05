@@ -21,6 +21,7 @@ const rolePaths = {
     '/tech/reviewExam',
     '/tech/printExam',
     '/tech/viewExam',
+    '/tech/viewBackupExam',
   ],
 };
 

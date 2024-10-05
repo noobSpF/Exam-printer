@@ -1,7 +1,8 @@
 {
-  "/admin/dashBoard/page": "app/admin/dashBoard/page.js",
-  "/instructor/dashBoard/page": "app/instructor/dashBoard/page.js",
-  "/exam-officer/dashBoard/page": "app/exam-officer/dashBoard/page.js",
   "/tech/printExam/page": "app/tech/printExam/page.js",
-  "/exam-officer/backupExam/page": "app/exam-officer/backupExam/page.js"
+  "/admin/dashBoard/page": "app/admin/dashBoard/page.js",
+  "/tech/viewBackupExam/page": "app/tech/viewBackupExam/page.js",
+  "/tech/dashBoard/page": "app/tech/dashBoard/page.js",
+  "/tech/viewExam/page": "app/tech/viewExam/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js"
 }

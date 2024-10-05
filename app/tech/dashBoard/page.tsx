@@ -378,7 +378,9 @@ export default function TechUnitPage() {
                                   ? 'text-yellow-500'
                                   : exam.Status === 'Ready to print'
                                     ? 'text-blue-600'
-                                    : 'text-gray-500'
+                                    : exam.Status === 'Backed up'
+                                      ? 'text-purple-600'
+                                      : 'text-gray-500'
                         }`}
                       >
                         {exam.Status}

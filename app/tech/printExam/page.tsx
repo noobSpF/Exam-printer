@@ -23,6 +23,7 @@ interface ExamData {
   Status: string;
   AmountStudent: number;
   File: string;
+  isBackup: boolean; // Flag to distinguish between Exam and Backup
 }
 interface SubjectData {
   SubID: string;
@@ -32,14 +33,15 @@ interface SubjectData {
 
 export default function PrintExamPage() {
   const [exams, setExams] = useState<ExamData[]>([]);
+  const [backupExams, setBackupExams] = useState<ExamData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const router = useRouter();
 
-  const [subject, setSubject] = useState<string>('');
-  const [term, setTerm] = useState<string>('');
+  const [subject, setSubject] = useState<string>('All subject');
+  const [term, setTerm] = useState<string>('All term');
   const [dueDate, setDueDate] = useState<string>('');
-  const [status, setStatus] = useState<string>('');
-  const [instructor, setInstructor] = useState<string>('');
+  const [status, setStatus] = useState<string>('All status');
+  const [instructor, setInstructor] = useState<string>('All instructor');
 
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
 
@@ -49,53 +51,113 @@ export default function PrintExamPage() {
       subject,
       term,
       dueDate,
-      status,
+      status: 'Ready to print', // Set default status filter
       instructor,
     };
 
     // Fetch exams based on filters
     fetchExams(filters);
   };
+
   const fetchExams = async (filters: any = {}) => {
     try {
-      // Initial query
-      let query = supabase.rpc('get_exam_details');
+      // Fetch exams from 'Exam' table
+      let examQuery = supabase
+        .from('Exam')
+        .select(
+          `
+          ExamID,
+          SubID,
+          DueDate,
+          Status,
+          Subject:SubID ( SubName, Instructor, Term, StudentAmount ),
+          attachmentUrl
+        `
+        )
+        .in('Status', ['Ready to print', 'Printed']); // Only non-backup statuses
 
-      // Apply filters
+      // Fetch data from 'Backup' table
+      let backupQuery = supabase
+        .from('Backup')
+        .select(
+          `
+        BackupID,
+        SubID,
+        DueDate,
+        Status,
+        SubName,
+        Instructor,
+        Term,
+        StudentAmount,
+        attachmentUrl
+      `
+        )
+        .in('Status', ['Backed up']); // Only 'Backed up' exams in 'Backup' table
+
+      // Apply filters to both queries
       if (filters.subject && filters.subject !== 'All subject') {
-        query = query.eq('SubID', filters.subject);
+        examQuery = examQuery.eq('SubID', filters.subject);
+        backupQuery = backupQuery.eq('SubID', filters.subject);
       }
       if (filters.term && filters.term !== 'All term') {
-        query = query.eq('Term', filters.term);
+        examQuery = examQuery.eq('Term', filters.term);
+        backupQuery = backupQuery.eq('Term', filters.term);
       }
       if (filters.dueDate) {
-        query = query.eq('DueDate', filters.dueDate);
-      }
-      if (filters.status && filters.status !== 'All status') {
-        query = query.eq('Status', filters.status);
+        examQuery = examQuery.eq('DueDate', filters.dueDate);
+        backupQuery = backupQuery.eq('DueDate', filters.dueDate);
       }
       if (filters.instructor && filters.instructor !== 'All instructor') {
-        query = query.eq('Instructor', filters.instructor);
+        examQuery = examQuery.eq('Instructor', filters.instructor);
+        backupQuery = backupQuery.eq('Instructor', filters.instructor);
       }
 
-      // Fetch data with applied filters
-      const { data, error } = await query;
+      // Execute both queries
+      const { data: examData, error: examError } = await examQuery;
+      const { data: backupData, error: backupError } = await backupQuery;
 
-      if (error) {
-        console.error('Error fetching exams:', error);
-      } else {
-        const transformedExams = data.map((exam: any) => ({
-          Subject: exam.SubID,
-          Subjectname: exam.SubName,
-          Term: exam.Term,
-          DueDate: exam.DueDate,
-          Instructor: exam.Instructor,
-          Status: exam.Status,
-          AmountStudent: exam.AmountStudent,
-          ExamID: exam.ExamID,
-        }));
-        setExams(transformedExams);
+      // Log results for debugging
+      console.log('Exam data fetched:', examData);
+      console.log('Backup data fetched:', backupData);
+
+      // Handle any errors
+      if (examError) {
+        console.error('Error fetching exam data:', examError);
       }
+      if (backupError) {
+        console.error('Error fetching backup data:', backupError);
+      }
+
+      // Transform the data for the Exam table
+      const transformedExams = (examData || []).map((item: any) => ({
+        ExamID: item.ExamID,
+        Subject: item.SubID,
+        Subjectname: item.Subject?.SubName || '',
+        Term: item.Subject?.Term || '',
+        DueDate: item.DueDate,
+        Instructor: item.Subject?.Instructor || '',
+        Status: item.Status,
+        AmountStudent: item.Subject?.StudentAmount || 0,
+        File: item.attachmentUrl,
+        isBackup: false,
+      }));
+
+      // Transform the data for the Backup table
+      const transformedBackupExams = (backupData || []).map((item: any) => ({
+        ExamID: item.BackupID,
+        Subject: item.SubID,
+        Subjectname: item.SubName || '', // Use SubName from the Backup table
+        Term: item.Term || '', // Use Term from the Backup table
+        DueDate: item.DueDate,
+        Instructor: item.Instructor || '', // Use Instructor from the Backup table
+        Status: item.Status,
+        AmountStudent: item.StudentAmount || 0,
+        File: item.attachmentUrl,
+        isBackup: true,
+      }));
+
+      setExams(transformedExams); // Store exam data in one state
+      setBackupExams(transformedBackupExams); // Store backup data in a separate state
     } catch (err) {
       console.error('Unexpected error:', err);
     } finally {
@@ -123,58 +185,19 @@ export default function PrintExamPage() {
 
     fetchSubjectsAndInstructors();
   }, []);
+
   // Fetch exams with status "Ready to print"
   useEffect(() => {
-    const fetchExams = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('Exam')
-          .select(
-            `
-            ExamID,
-            SubID,
-            DueDate,
-            Status,
-            Subject:SubID ( SubName, Instructor, Term, StudentAmount ),
-            attachmentUrl
-          `
-          )
-          .in('Status', ['Ready to print', 'Printed', 'Backed up']); // Filter exams with multiple statuses
-
-        if (error) {
-          console.error('Error fetching exams:', error);
-        } else {
-          // Map the fetched data to your component's format
-          const transformedExams = data.map((exam: any) => ({
-            ExamID: exam.ExamID,
-            Subject: exam.SubID,
-            Subjectname: exam.Subject?.SubName || '',
-            Term: exam.Subject?.Term || '',
-            DueDate: exam.DueDate,
-            Instructor: exam.Subject?.Instructor || '',
-            Status: exam.Status,
-            AmountStudent: exam.Subject?.StudentAmount || 0,
-            File: exam.attachmentUrl,
-          }));
-          setExams(transformedExams); // Store the transformed data
-        }
-      } catch (err) {
-        console.error('Unexpected error:', err);
-      } finally {
-        setLoading(false); // Set loading to false once data is fetched
-      }
-    };
-
-    fetchExams();
+    fetchExams(); // Fetch exams initially without filters
   }, []);
 
   // Handle exam review or print
-  const handlePrintExam = async (ExamID: string) => {
-    console.log(ExamID);
+  const handlePrintExam = async (ExamID: string, isBackup: boolean) => {
+    let table = isBackup ? 'Backup' : 'Exam';
     const { data: examData, error: examError } = await supabase
-      .from('Exam')
+      .from(table)
       .select('attachmentUrl')
-      .eq('ExamID', ExamID)
+      .eq(isBackup ? 'BackupID' : 'ExamID', ExamID)
       .single();
 
     if (examError) {
@@ -182,8 +205,6 @@ export default function PrintExamPage() {
       alert('Error fetching exam data');
       return;
     }
-
-    console.log(examData);
 
     // Check if there is an attachment URL (exam file)
     if (!examData?.attachmentUrl) {
@@ -208,10 +229,13 @@ export default function PrintExamPage() {
     if (printWindow) {
       printWindow.focus();
       printWindow.print();
+
+      // Update the exam status to "Printed" only if the current status is "Ready to print"
       const { error: updateError } = await supabase
-        .from('Exam')
+        .from(table)
         .update({ Status: 'Printed' })
-        .eq('ExamID', ExamID);
+        .eq(isBackup ? 'BackupID' : 'ExamID', ExamID)
+        .eq('Status', 'Ready to print'); // Ensure the current status is "Ready to print"
 
       if (updateError) {
         console.error('Error updating exam status:', updateError);
@@ -316,13 +340,14 @@ export default function PrintExamPage() {
         </div>
       </div>
 
-      {/* Table Section */}
-      <main className=" bg-gray-100 flex-grow">
+      {/* Exam Table Section */}
+      <main className="bg-gray-100 flex-grow">
         {loading ? (
           <p>Loading...</p>
         ) : (
           <div className="overflow-auto">
-            <table className="min-w-full bg-white shadow-md rounded-lg">
+            <h3 className="text-2xl  mt-4">Exam</h3>
+            <table className="min-w-full bg-white shadow-md rounded-lg mb-8">
               <thead>
                 <tr className="bg-gray-200">
                   <th className="py-2 px-4">Subject</th>
@@ -331,7 +356,7 @@ export default function PrintExamPage() {
                   <th className="py-2 px-4">Due Date</th>
                   <th className="py-2 px-4">Instructor</th>
                   <th className="py-2 px-4">Status</th>
-                  <th className="py-2 px-4">Print</th> {/* New Print Column */}
+                  <th className="py-2 px-4">Print</th>
                 </tr>
               </thead>
 
@@ -345,38 +370,22 @@ export default function PrintExamPage() {
                       <button
                         className={`px-4 rounded-lg ${
                           exam.Status !== 'Ready to print' &&
-                          exam.Status !== 'Printed' &&
-                          exam.Status !== 'Backed up'
-                            ? 'bg-gray-500 text-white cursor-not-allowed' // Gray button for other statuses
-                            : 'bg-blue-500 text-white hover:bg-blue-700' // Blue button for allowed statuses
+                          exam.Status !== 'Printed'
+                            ? 'bg-gray-500 text-white cursor-not-allowed'
+                            : 'bg-blue-500 text-white hover:bg-blue-700'
                         }`}
                         disabled={
                           exam.Status !== 'Ready to print' &&
-                          exam.Status !== 'Printed' &&
-                          exam.Status !== 'Backed up'
-                        } // Disable button when the status is not allowed
-                        onClick={async () => {
-                          if (
-                            exam.Status !== 'Ready to print' &&
-                            exam.Status !== 'Printed' &&
-                            exam.Status !== 'Backed up'
-                          ) {
-                            return; // Prevent click event if the status is not allowed
-                          }
-
-                          // Navigate to the viewExam page with the fetched ExamID
-                          router.push(`/tech/viewExam?examId=${exam.ExamID}`);
-                        }}
+                          exam.Status !== 'Printed'
+                        }
+                        onClick={() =>
+                          router.push(`/tech/viewExam?examId=${exam.ExamID}`)
+                        }
                       >
-                        {(exam.Status === 'Ready to print' ||
-                          exam.Status === 'Printed' ||
-                          exam.Status === 'Backed up') && (
-                          <FontAwesomeIcon icon={faEye} className="mr-2" />
-                        )}
+                        <FontAwesomeIcon icon={faEye} className="mr-2" />
                         Exam
                       </button>
                     </td>
-
                     <td className="py-2 px-4 text-center">{exam.Term}</td>
                     <td className="py-2 px-4 text-center">{exam.DueDate}</td>
                     <td className="py-2 px-4 text-center">{exam.Instructor}</td>
@@ -400,7 +409,72 @@ export default function PrintExamPage() {
                     <td className="py-2 px-4 text-center">
                       <button
                         className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-                        onClick={() => handlePrintExam(exam.ExamID)}
+                        onClick={() => handlePrintExam(exam.ExamID, false)}
+                      >
+                        <FontAwesomeIcon icon={faPrint} className="mr-2" />
+                        Print
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Backup Table Section */}
+            <h3 className="text-2xl mt-4">Backup</h3>
+            <table className="min-w-full bg-white shadow-md rounded-lg">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="py-2 px-4">Subject</th>
+                  <th className="py-2 px-4">View exam</th>
+                  <th className="py-2 px-4">Term</th>
+                  <th className="py-2 px-4">Due Date</th>
+                  <th className="py-2 px-4">Instructor</th>
+                  <th className="py-2 px-4">Status</th>
+                  <th className="py-2 px-4">Print</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {backupExams.map((exam, index) => (
+                  <tr key={index}>
+                    <td className="py-2 px-4 text-center">
+                      {`${exam.Subject} ${exam.Subjectname}`}
+                    </td>
+                    <td className="py-2 px-4 text-center">
+                      <button
+                        className={`px-4 rounded-lg ${
+                          exam.Status !== 'Backed up'
+                            ? 'bg-gray-500 text-white cursor-not-allowed'
+                            : 'bg-blue-500 text-white hover:bg-blue-700'
+                        }`}
+                        disabled={exam.Status !== 'Backed up'}
+                        onClick={() =>
+                          router.push(
+                            `/tech/viewBackupExam?examId=${exam.ExamID}&isBackup=${exam.isBackup}`
+                          )
+                        }
+                      >
+                        <FontAwesomeIcon icon={faEye} className="mr-2" />
+                        Exam
+                      </button>
+                    </td>
+                    <td className="py-2 px-4 text-center">{exam.Term}</td>
+                    <td className="py-2 px-4 text-center">{exam.DueDate}</td>
+                    <td className="py-2 px-4 text-center">{exam.Instructor}</td>
+                    <td
+                      className={`py-2 px-4 text-center ${
+                        exam.Status === 'Backed up'
+                          ? 'text-purple-600'
+                          : 'text-gray-500'
+                      }`}
+                    >
+                      {exam.Status}
+                    </td>
+                    <td className="py-2 px-4 text-center">
+                      <button
+                        className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+                        onClick={() => handlePrintExam(exam.ExamID, true)}
                       >
                         <FontAwesomeIcon icon={faPrint} className="mr-2" />
                         Print

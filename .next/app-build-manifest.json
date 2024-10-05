@@ -1,9 +1,9 @@
 {
   "pages": {
-    "/exam-officer/dashBoard/page": [
+    "/sign-in/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/exam-officer/dashBoard/page.js"
+      "static/chunks/app/sign-in/page.js"
     ],
     "/layout": [
       "static/chunks/webpack.js",
@@ -11,80 +11,55 @@
       "static/css/app/layout.css",
       "static/chunks/app/layout.js"
     ],
-    "/exam-officer/profile/page": [
+    "/exam-officer/dashBoard/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/exam-officer/profile/page.js"
-    ],
-    "/sign-in/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/sign-in/page.js"
-    ],
-    "/admin/dashBoard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/dashBoard/page.js"
-    ],
-    "/admin/addUser/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/addUser/page.js"
-    ],
-    "/admin/editUser/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/admin/editUser/[id]/page.js"
-    ],
-    "/tech/dashBoard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/tech/dashBoard/page.js"
-    ],
-    "/tech/profile/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/tech/profile/page.js"
-    ],
-    "/tech/printExam/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/tech/printExam/page.js"
-    ],
-    "/tech/reviewExam/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/tech/reviewExam/page.js"
-    ],
-    "/instructor/dashBoard/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/instructor/dashBoard/page.js"
-    ],
-    "/instructor/addExam/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/instructor/addExam/page.js"
-    ],
-    "/instructor/profile/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/instructor/profile/page.js"
+      "static/chunks/app/exam-officer/dashBoard/page.js"
     ],
     "/exam-officer/backupExam/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/exam-officer/backupExam/page.js"
     ],
-    "/exam-officer/addSubject/page": [
+    "/exam-officer/profile/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
-      "static/chunks/app/exam-officer/addSubject/page.js"
+      "static/chunks/app/exam-officer/profile/page.js"
+    ],
+    "/tech/dashBoard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/tech/dashBoard/page.js"
+    ],
+    "/tech/printExam/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/tech/printExam/page.js"
     ],
     "/tech/viewExam/page": [
       "static/chunks/webpack.js",
       "static/chunks/main-app.js",
       "static/chunks/app/tech/viewExam/page.js"
+    ],
+    "/admin/dashBoard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/admin/dashBoard/page.js"
+    ],
+    "/tech/profile/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/tech/profile/page.js"
+    ],
+    "/tech/viewBackupExam/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/tech/viewBackupExam/page.js"
+    ],
+    "/instructor/dashBoard/page": [
+      "static/chunks/webpack.js",
+      "static/chunks/main-app.js",
+      "static/chunks/app/instructor/dashBoard/page.js"
     ]
   }
 }

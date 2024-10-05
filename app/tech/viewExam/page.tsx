@@ -35,7 +35,9 @@ export default function ViewExamPage() {
   );
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const examID = searchParams.get('examId');
+  const isBackup = searchParams.get('isBackup') === 'true'; // Check if this is for the Backup table
 
   const [examData, setExamData] = useState<ExamData | null>(null);
 
@@ -45,13 +47,16 @@ export default function ViewExamPage() {
       if (!examID) return;
 
       try {
-        // Fetch exam details from the Exam table
+        // Fetch exam details from either the Exam or Backup table based on the flag
+        const table = isBackup ? 'Backup' : 'Exam'; // Choose the correct table
+        const idColumn = isBackup ? 'BackupID' : 'ExamID'; // Correct column for filtering
+
         const { data: examData, error: examError } = await supabase
-          .from('Exam')
+          .from(table)
           .select(
             'ExamID, ExamDate, ExamTime, ExamRoom, AnswerSheet, Note, Calculator, Ruler, Description, Status, SubID, attachmentUrl'
           )
-          .eq('ExamID', examID)
+          .eq(idColumn, examID)
           .single();
 
         if (examError) {
@@ -112,17 +117,20 @@ export default function ViewExamPage() {
     };
 
     fetchExamData();
-  }, [examID, router]);
+  }, [examID, router, isBackup]);
 
   const handlePrintExam = async () => {
     if (!examID || !examData) return;
 
     try {
       if (examData.Status === 'Ready to print') {
+        const table = isBackup ? 'Backup' : 'Exam'; // Choose the correct table for the update
+        const idColumn = isBackup ? 'BackupID' : 'ExamID'; // Correct column for filtering
+
         const { error: updateError } = await supabase
-          .from('Exam')
+          .from(table)
           .update({ Status: 'Printed' })
-          .eq('ExamID', examID);
+          .eq(idColumn, examID);
 
         if (updateError) {
           console.error('Error updating exam status:', updateError);

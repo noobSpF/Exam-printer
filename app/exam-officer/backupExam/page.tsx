@@ -18,40 +18,68 @@ interface BackupData {
   DueDate: string;
   Instructor: string;
   Status: string;
+  Semester: string; // Add Semester to handle filtering
 }
 
 export default function ExamOfficerPage() {
   const [exams, setExams] = useState<BackupData[]>([]);
+  const [subjects, setSubjects] = useState<
+    { SubID: string; SubName: string; Instructor: string }[]
+  >([]); // Subjects state
   const [loading, setLoading] = useState<boolean>(true);
 
   // Filter states
   const [subject, setSubject] = useState<string>('All subject');
-  const [subjectname, setSubjectname] = useState<string>('All subjectName');
   const [term, setTerm] = useState<string>('All term');
   const [dueDate, setDueDate] = useState<string>(''); // This will be a date string
   const [status, setStatus] = useState<string>('All status');
   const [instructor, setInstructor] = useState<string>('All instructor');
+  const [semester, setSemester] = useState<string>('1/2567'); // State for semester filter
 
   const router = useRouter();
 
-  // Fetch exam data
+  // Fetch subjects and exam data
   useEffect(() => {
-    const fetchExams = async () => {
+    const fetchData = async () => {
       try {
-        const { data, error } = await supabase.from('Backup').select('*'); // Fetch data from your 'Exam' table
+        const defaultSemester = '1/2567'; // Set default semester here
 
-        if (error) {
-          console.error('Error fetching exams:', error);
+        // Fetch exam data for the default semester
+        const { data: examsData, error: examsError } = await supabase
+          .from('Backup')
+          .select('*')
+          .eq('Semester', defaultSemester); // Add semester filter here
+
+        // Fetch subjects with "Backed up" status for the default semester
+        const { data: subjectsData, error: subjectsError } = await supabase
+          .from('Backup')
+          .select('SubID, SubName, Instructor')
+          .eq('Status', 'Backed up')
+          .eq('Semester', defaultSemester); // Add semester filter here
+
+        // Log the fetched data for debugging
+        console.log('Fetched exams data:', examsData);
+        console.log('Fetched subjects data:', subjectsData);
+
+        if (examsError || subjectsError) {
+          console.error(
+            'Error fetching exams or subjects:',
+            examsError || subjectsError
+          );
         } else {
-          const transformedExams = data.map((exam: any) => ({
+          // Transform and set data
+          const transformedExams = examsData.map((exam: any) => ({
             Subject: exam.SubID,
-            Subjectname: exam.SubName, // Assuming SubID holds the subject identifier
-            Term: exam.Term, // This is static; adjust based on your data
-            DueDate: exam.DueDate, // Format date
-            Instructor: exam.Instructor, // Assuming Instructor field holds the name
-            Status: exam.Status, // Custom logic for status
+            Subjectname: exam.SubName,
+            Term: exam.Term,
+            DueDate: exam.DueDate,
+            Instructor: exam.Instructor,
+            Status: exam.Status,
+            Semester: exam.Semester, // Capture Semester in the transformation
           }));
+
           setExams(transformedExams);
+          setSubjects(subjectsData); // Set the subjects
         }
       } catch (err) {
         console.error('Unexpected error:', err);
@@ -60,20 +88,80 @@ export default function ExamOfficerPage() {
       }
     };
 
-    fetchExams();
+    fetchData();
   }, []);
 
   const handleProfile = () => {
     router.push('/exam-officer/profile'); // Navigate to Add User page
   };
+
   const handleDashBoard = () => {
-    router.push('/exam-officer/dashBoard'); // Navigate to backup exam page
+    router.push('/exam-officer/dashBoard'); // Navigate to dashboard page
   };
 
   // Handle filter application
-  const handleApplyFilters = () => {
-    // TODO: Apply filters to the fetched data
-    // You can use the states like `subject`, `term`, `dueDate`, `status`, and `instructor` to filter the data
+  const handleApplyFilters = async () => {
+    try {
+      console.log('Applying filters with:', {
+        subject,
+        term,
+        dueDate,
+        instructor,
+        semester, // Log semester filter
+      });
+
+      let query = supabase.from('Backup').select('*');
+
+      // Apply subject filter
+      if (subject !== 'All subject') {
+        query = query.eq('SubID', subject);
+      }
+
+      // Apply term filter
+      if (term !== 'All term') {
+        query = query.eq('Term', term);
+      }
+
+      // Apply dueDate filter
+      if (dueDate) {
+        query = query.eq('DueDate', dueDate);
+      }
+
+      // Apply instructor filter
+      if (instructor !== 'All instructor') {
+        query = query.eq('Instructor', instructor);
+      }
+
+      // Apply semester filter
+      if (semester) {
+        query = query.eq('Semester', semester);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching filtered exams:', error);
+        return;
+      }
+
+      // Log the filtered data
+      const filteredExams = data.map(
+        (exam: any): BackupData => ({
+          Subject: exam.SubID,
+          Subjectname: exam.SubName,
+          Term: exam.Term,
+          DueDate: exam.DueDate,
+          Instructor: exam.Instructor,
+          Status: exam.Status,
+          Semester: exam.Semester, // Capture Semester in the transformation
+        })
+      );
+
+      // Set filtered data to the exams state
+      setExams(filteredExams);
+    } catch (err) {
+      console.error('Error applying filters:', err);
+    }
   };
 
   return (
@@ -106,7 +194,7 @@ export default function ExamOfficerPage() {
             คณะวิทยาศาสตร์ มหาวิทยาลัยสงขลานครินทร์
           </h3>
           <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 text-center lg:text-left">
-            Semester: 1/2567
+            Semester: {semester}
           </h2>
 
           {/* User Icon */}
@@ -134,7 +222,12 @@ export default function ExamOfficerPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               >
-                <option>All subject</option>
+                <option value="All subject">All subject</option>
+                {subjects.map((subjz) => (
+                  <option key={subjz.SubID} value={subjz.SubID}>
+                    {subjz.SubID} {subjz.SubName}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Term Filter */}
@@ -147,7 +240,7 @@ export default function ExamOfficerPage() {
               >
                 <option>All term</option>
                 <option>Midterm</option>
-                <option>Final</option>
+                <option>Finalterm</option>
               </select>
             </div>
             {/* Due Date Filter */}
@@ -160,22 +253,6 @@ export default function ExamOfficerPage() {
                 onChange={(e) => setDueDate(e.target.value)}
               />
             </div>
-            {/* Status Filter */}
-            <div className="flex flex-col">
-              <label className="text-gray-600">Status</label>
-              <select
-                className="border p-2 rounded-lg"
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-              >
-                <option>All status</option>
-                <option>Not Submitted</option>
-                <option>Printed</option>
-                <option>Submitted</option>
-                <option>Issue</option>
-                <option>Ready to print</option>
-              </select>
-            </div>
             {/* Instructor Filter */}
             <div className="flex flex-col">
               <label className="text-gray-600">Instructor</label>
@@ -184,7 +261,26 @@ export default function ExamOfficerPage() {
                 value={instructor}
                 onChange={(e) => setInstructor(e.target.value)}
               >
-                <option>All instructor</option>
+                <option value="All instructor">All instructor</option>
+                {Array.from(
+                  new Set(subjects.map((subj) => subj.Instructor))
+                ).map((instructor) => (
+                  <option key={instructor} value={instructor}>
+                    {instructor}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {/* Semester Filter */}
+            <div className="flex flex-col">
+              <label className="text-gray-600">Semester</label>
+              <select
+                className="border p-2 rounded-lg"
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+              >
+                <option value="1/2567">1/2567</option>
+                <option value="2/2567">2/2567</option>
               </select>
             </div>
             {/* Apply Button */}
@@ -213,6 +309,8 @@ export default function ExamOfficerPage() {
                     <th className="py-2 px-4">Term</th>
                     <th className="py-2 px-4">Due Date</th>
                     <th className="py-2 px-4">Instructor</th>
+                    <th className="py-2 px-4">Semester</th>{' '}
+                    {/* Display Semester */}
                     <th className="py-2 px-4">Status</th>
                   </tr>
                 </thead>
@@ -223,7 +321,7 @@ export default function ExamOfficerPage() {
                         {`${exam.Subject} ${exam.Subjectname}`}
                       </td>
                       <td className="py-2 px-4 text-center">
-                        <button className="bg-blue-500 text-white px-4  rounded-lg">
+                        <button className="bg-blue-500 text-white px-4 rounded-lg">
                           exam
                         </button>
                       </td>
@@ -232,6 +330,8 @@ export default function ExamOfficerPage() {
                       <td className="py-2 px-4 text-center">
                         {exam.Instructor}
                       </td>
+                      <td className="py-2 px-4 text-center">{exam.Semester}</td>{' '}
+                      {/* Show Semester */}
                       <td
                         className={`py-2 px-4 text-center ${
                           exam.Status === 'Not Submitted'

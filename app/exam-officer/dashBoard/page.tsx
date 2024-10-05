@@ -28,6 +28,9 @@ export default function ExamOfficerPage() {
 
   // Filter states
   const [subject, setSubject] = useState<string>('All subject');
+  const [subjects, setSubjects] = useState<
+    { SubID: string; SubName: string; Instructor: string }[]
+  >([]);
   const [subjectname, setSubjectname] = useState<string>('All subjectName');
   const [term, setTerm] = useState<string>('All term');
   const [dueDate, setDueDate] = useState<string>(''); // This will be a date string
@@ -75,6 +78,18 @@ export default function ExamOfficerPage() {
     if (!confirmDelete) return;
 
     try {
+      // Delete related records from the 'Submit' table
+      const { error: submitError } = await supabase
+        .from('Submit')
+        .delete()
+        .eq('SubID', subjectId);
+
+      if (submitError) {
+        console.error('Error deleting related submit records:', submitError);
+        alert('Failed to delete related submit records. Please try again.');
+        return;
+      }
+
       // Delete related exams from the 'Exam' table
       const { error: examError } = await supabase
         .from('Exam')
@@ -117,9 +132,85 @@ export default function ExamOfficerPage() {
 
   // Handle filter application
   const handleApplyFilters = () => {
-    // TODO: Apply filters to the fetched data
-    // You can use the states like `subject`, `term`, `dueDate`, `status`, and `instructor` to filter the data
+    // Create a filter object based on current state
+    const filters = {
+      subject,
+      term,
+      dueDate,
+      status,
+      instructor,
+    };
+
+    // Fetch exams based on filters
+    fetchExams(filters);
   };
+  const fetchExams = async (filters: any = {}) => {
+    try {
+      // Initial query
+      let query = supabase.rpc('get_exam_details');
+
+      // Apply filters
+      if (filters.subject && filters.subject !== 'All subject') {
+        query = query.eq('SubID', filters.subject);
+      }
+      if (filters.term && filters.term !== 'All term') {
+        query = query.eq('Term', filters.term);
+      }
+      if (filters.dueDate) {
+        query = query.eq('DueDate', filters.dueDate);
+      }
+      if (filters.status && filters.status !== 'All status') {
+        query = query.eq('Status', filters.status);
+      }
+      if (filters.instructor && filters.instructor !== 'All instructor') {
+        query = query.eq('Instructor', filters.instructor);
+      }
+
+      // Fetch data with applied filters
+      const { data, error } = await query;
+
+      if (error) {
+        console.error('Error fetching exams:', error);
+      } else {
+        const transformedExams = data.map((exam: any) => ({
+          Subject: exam.SubID,
+          Subjectname: exam.SubName,
+          Term: exam.Term,
+          DueDate: exam.DueDate,
+          Instructor: exam.Instructor,
+          Status: exam.Status,
+          AmountStudent: exam.AmountStudent,
+          ExamID: exam.ExamID,
+        }));
+        setExams(transformedExams);
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch subjects and instructors from the Subject table
+  useEffect(() => {
+    const fetchSubjectsAndInstructors = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('Subject')
+          .select('SubID, SubName, Instructor');
+
+        if (error) {
+          console.error('Error fetching subjects and instructors:', error);
+        } else {
+          setSubjects(data); // Store fetched subjects
+        }
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      }
+    };
+
+    fetchSubjectsAndInstructors();
+  }, []);
   const handleBackup = async (exam: ExamData) => {
     const confirmBackup = window.confirm(
       'Are you sure you want to back up this exam and remove it from the system?'
@@ -128,7 +219,22 @@ export default function ExamOfficerPage() {
     if (!confirmBackup) return;
 
     try {
-      // Update the exam status to 'Backed up'
+      // Step 1: Fetch the ExamID associated with the SubID (exam.Subject)
+      const { data: examData, error: examFetchError } = await supabase
+        .from('Exam')
+        .select('ExamID') // Assuming ExamID is in the Exam table
+        .eq('SubID', exam.Subject)
+        .single();
+
+      if (examFetchError || !examData) {
+        console.error('Error fetching ExamID:', examFetchError);
+        alert('Failed to fetch ExamID for backup. Please try again.');
+        return;
+      }
+
+      const examId = examData.ExamID;
+
+      // Step 2: Update the exam status to 'Backed up'
       const { error: updateError } = await supabase
         .from('Exam')
         .update({ Status: 'Backed up' })
@@ -140,12 +246,25 @@ export default function ExamOfficerPage() {
         return;
       }
 
-      // Optionally, delete the exam and subject after backing up
+      // Step 3: Delete related records from the 'Submit' table using the fetched ExamID
+      const { error: submitError } = await supabase
+        .from('Submit')
+        .delete()
+        .eq('ExamID', examId); // Use the fetched ExamID here
+
+      if (submitError) {
+        console.error('Error deleting related submit records:', submitError);
+        alert('Failed to delete related submit records. Please try again.');
+        return;
+      }
+
+      // Step 4: Delete the exam from the 'Exam' table
       const { error: deleteExamError } = await supabase
         .from('Exam')
         .delete()
         .eq('SubID', exam.Subject);
 
+      // Step 5: Delete the subject from the 'Subject' table
       const { error: deleteSubjectError } = await supabase
         .from('Subject')
         .delete()
@@ -232,9 +351,15 @@ export default function ExamOfficerPage() {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
               >
-                <option>All subject</option>
+                <option value="All subject">All subject</option>
+                {subjects.map((subj) => (
+                  <option key={subj.SubID} value={subj.SubID}>
+                    {subj.SubName}
+                  </option>
+                ))}
               </select>
             </div>
+
             {/* Term Filter */}
             <div className="flex flex-col">
               <label className="text-gray-600">Term</label>
@@ -245,7 +370,7 @@ export default function ExamOfficerPage() {
               >
                 <option>All term</option>
                 <option>Midterm</option>
-                <option>Final</option>
+                <option>Finalterm</option>
               </select>
             </div>
             {/* Due Date Filter */}
@@ -282,7 +407,14 @@ export default function ExamOfficerPage() {
                 value={instructor}
                 onChange={(e) => setInstructor(e.target.value)}
               >
-                <option>All instructor</option>
+                <option value="All instructor">All instructor</option>
+                {Array.from(
+                  new Set(subjects.map((subj) => subj.Instructor))
+                ).map((instructor) => (
+                  <option key={instructor} value={instructor}>
+                    {instructor}
+                  </option>
+                ))}
               </select>
             </div>
             {/* Apply Button */}
@@ -312,7 +444,7 @@ export default function ExamOfficerPage() {
                     <th className="py-2 px-4">Due Date</th>
                     <th className="py-2 px-4">Instructor</th>
                     <th className="py-2 px-4">Status</th>
-                    <th className="py-2 px-4">Action</th>
+                    <th className="py-2 px-4">Delete</th>
                     <th className="py-2 px-4">Backup</th>
                   </tr>
                 </thead>
@@ -371,20 +503,22 @@ export default function ExamOfficerPage() {
                           {exam.Status}
                         </td>
                         <td className="py-2 px-4 text-center">
-                          <button
-                            className="text-red-400 hover:text-red-700"
-                            onClick={() => handleDeleteSubject(exam.Subject)}
-                          >
-                            <AiOutlineDelete size={20} />
-                          </button>
+                          {exam.Status === 'Not Submitted' && (
+                            <button
+                              className="text-red-400 hover:text-red-700"
+                              onClick={() => handleDeleteSubject(exam.Subject)}
+                            >
+                              <AiOutlineDelete size={20} />
+                            </button>
+                          )}
                         </td>
                         <td className="py-2 px-4 text-center">
                           {exam.Status === 'Printed' && (
                             <button
-                              className="text-blue-500 hover:text-blue-700 mr-4"
+                              className="text-blue-500 hover:text-blue-700 mr-4 justify-center"
                               onClick={() => handleBackup(exam)}
                             >
-                              <AiOutlineCloudUpload size={20} /> Back up
+                              <AiOutlineCloudUpload size={30} />
                             </button>
                           )}
                         </td>

@@ -43,6 +43,9 @@ export default function LayoutTech2({
             Exam printer ระบบจัดพิมพ์ข้อสอบ <br />
             คณะวิทยาศาสตร์ มหาวิทยาลัยสงขลานครินทร์
           </h3>
+          <h2 className="text-2xl lg:text-3xl font-bold text-gray-800 text-center lg:text-left">
+            Semester: 1/2567
+          </h2>
 
           {/* User Icon */}
           <div className="relative mt-4 lg:mt-0">
