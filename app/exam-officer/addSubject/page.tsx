@@ -313,11 +313,6 @@ export default function AddNewSubject() {
               >
                 <option value="">Select Semester</option>
                 <option value="1/2567">1/2567</option>
-                <option value="2/2567">2/2567</option>
-                <option value="3/2567">3/2567</option>
-                <option value="1/2568">1/2568</option>
-                <option value="2/2568">2/2568</option>
-                <option value="3/2568">3/2568</option>
               </select>
             </div>
 

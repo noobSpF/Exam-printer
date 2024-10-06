@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense} from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LayoutTech2 from '@/components/LayoutTech2';
@@ -139,15 +139,11 @@ function BackupExamPage() {
                 <p>
                   <strong>ต้องการกระดาษคำตอบหรือไม่:</strong>{' '}
                   <span
-                    className={`${examData.AnswerSheet ? 'text-green-500' : 'text-red-500'}`}
+                    className={
+                      examData.AnswerSheet ? 'text-green-500' : 'text-red-500'
+                    }
                   >
-                    <input
-                      type="checkbox"
-                      checked={examData.AnswerSheet === true}
-                      readOnly
-                      className={`ml-2 ${examData.AnswerSheet ? 'bg-green-500' : 'bg-red-500'}`}
-                    />
-                    {examData.AnswerSheet ? '  Yes' : '  No'}
+                    {examData.AnswerSheet ? 'Yes' : 'No'}
                   </span>
                 </p>
               </div>
@@ -156,15 +152,11 @@ function BackupExamPage() {
                 <p>
                   <strong>นำตำราเข้าห้องสอบได้:</strong>{' '}
                   <span
-                    className={`${examData.Note ? 'text-green-500' : 'text-red-500'}`}
+                    className={
+                      examData.Note ? 'text-green-500' : 'text-red-500'
+                    }
                   >
-                    <input
-                      type="checkbox"
-                      checked={examData.Note === true}
-                      readOnly
-                      className={`ml-2 ${examData.Note ? 'bg-green-500' : 'bg-red-500'}`}
-                    />
-                    {examData.Note ? '  Yes' : '  No'}
+                    {examData.Note ? 'Yes' : 'No'}
                   </span>
                 </p>
               </div>
@@ -173,15 +165,11 @@ function BackupExamPage() {
                 <p>
                   <strong>นำเครื่องคิดเลขเข้าห้องสอบได้:</strong>{' '}
                   <span
-                    className={`${examData.Calculator ? 'text-green-500' : 'text-red-500'}`}
+                    className={
+                      examData.Calculator ? 'text-green-500' : 'text-red-500'
+                    }
                   >
-                    <input
-                      type="checkbox"
-                      checked={examData.Calculator === true}
-                      readOnly
-                      className={`ml-2 ${examData.Calculator ? 'bg-green-500' : 'bg-red-500'}`}
-                    />
-                    {examData.Calculator ? '  Yes' : '  No'}
+                    {examData.Calculator ? 'Yes' : 'No'}
                   </span>
                 </p>
               </div>
@@ -190,15 +178,11 @@ function BackupExamPage() {
                 <p>
                   <strong>ห้ามนำไม้บรรทัดมีสูตรคณิตศาสตร์เข้าสอบ:</strong>{' '}
                   <span
-                    className={`${examData.Ruler ? 'text-green-500' : 'text-red-500'}`}
+                    className={
+                      examData.Ruler ? 'text-green-500' : 'text-red-500'
+                    }
                   >
-                    <input
-                      type="checkbox"
-                      checked={examData.Ruler === true}
-                      readOnly
-                      className={`ml-2 ${examData.Ruler ? 'bg-green-500' : 'bg-red-500'}`}
-                    />
-                    {examData.Ruler ? '  Yes' : '  No'}
+                    {examData.Ruler ? 'Yes' : 'No'}
                   </span>
                 </p>
               </div>

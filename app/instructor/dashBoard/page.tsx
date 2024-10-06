@@ -30,7 +30,7 @@ export default function InstructorPage() {
 
   const [subject, setSubject] = useState<string>('All subject');
   const [term, setTerm] = useState<string>('All term');
-  const [dueDate, setDueDate] = useState<string>('');
+  const [dueDate, setDueDate] = useState<string>(''); 
   const [status, setStatus] = useState<string>('All status');
   const [instructor, setInstructor] = useState<string>('All instructor');
 
@@ -79,10 +79,7 @@ export default function InstructorPage() {
               .single();
 
             if (examError) {
-              console.error(
-                `Error fetching exam for subject ${subject.SubID}:`,
-                examError
-              );
+              console.error(`Error fetching exam for subject ${subject.SubID}:`, examError);
             }
 
             return {
@@ -116,7 +113,7 @@ export default function InstructorPage() {
   const handleApplyFilters = async () => {
     try {
       setLoading(true);
-
+  
       // Start with the Exam query if status filter is applied
       let subIDs;
       if (status !== 'All status') {
@@ -124,21 +121,21 @@ export default function InstructorPage() {
           .from('Exam')
           .select('SubID')
           .eq('Status', status);
-
+  
         if (examError) {
           console.error('Error fetching exams:', examError);
           setError('Error applying filters.');
           return;
         }
-
-        subIDs = examData.map((exam) => exam.SubID);
+  
+        subIDs = examData.map(exam => exam.SubID);
       }
-
+  
       // Now query the Subject table
       let query = supabase
         .from('Subject')
         .select('SubID, SubName, Term, Instructor, StudentAmount');
-
+  
       // Apply filters
       if (subject !== 'All subject') {
         query = query.eq('SubID', subject);
@@ -152,15 +149,15 @@ export default function InstructorPage() {
       if (subIDs) {
         query = query.in('SubID', subIDs);
       }
-
+  
       const { data: subjectData, error: subjectError } = await query;
-
+  
       if (subjectError) {
         console.error('Error fetching filtered subjects:', subjectError);
         setError('Error fetching filtered subjects.');
         return;
       }
-
+  
       // Transform data
       const transformedData = await Promise.all(
         subjectData.map(async (subject) => {
@@ -169,7 +166,7 @@ export default function InstructorPage() {
             .select('DueDate, Status')
             .eq('SubID', subject.SubID)
             .single();
-
+  
           return {
             SubID: subject.SubID,
             SubName: subject.SubName,
@@ -181,7 +178,7 @@ export default function InstructorPage() {
           };
         })
       );
-
+  
       setSubjects(transformedData);
     } catch (err) {
       console.error('Unexpected error:', err);
@@ -292,7 +289,7 @@ export default function InstructorPage() {
             {/* Apply Button */}
             <div className="flex flex-col justify-end">
               <button
-                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500 w-1/2"
+                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
                 onClick={handleApplyFilters}
               >
                 Apply

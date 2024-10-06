@@ -420,7 +420,7 @@ export default function ExamOfficerPage() {
             {/* Apply Button */}
             <div className="flex flex-col justify-end">
               <button
-                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500 w-1/2"
+                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
                 onClick={handleApplyFilters}
               >
                 Apply

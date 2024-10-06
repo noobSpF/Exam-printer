@@ -107,6 +107,7 @@ export default function ExamOfficerPage() {
         term,
         dueDate,
         instructor,
+        semester, // Log semester filter
       });
 
       let query = supabase.from('Backup').select('*');
@@ -270,11 +271,22 @@ export default function ExamOfficerPage() {
                 ))}
               </select>
             </div>
-
+            {/* Semester Filter */}
+            <div className="flex flex-col">
+              <label className="text-gray-600">Semester</label>
+              <select
+                className="border p-2 rounded-lg"
+                value={semester}
+                onChange={(e) => setSemester(e.target.value)}
+              >
+                <option value="1/2567">1/2567</option>
+                <option value="2/2567">2/2567</option>
+              </select>
+            </div>
             {/* Apply Button */}
             <div className="flex flex-col justify-end">
               <button
-                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500 w-1/2"
+                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
                 onClick={handleApplyFilters}
               >
                 Apply

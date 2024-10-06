@@ -253,7 +253,22 @@ export default function TechUnitPage() {
                 onChange={(e) => setDueDate(e.target.value)}
               />
             </div>
-
+            {/* Status Filter */}
+            <div className="flex flex-col">
+              <label className="text-gray-600">Status</label>
+              <select
+                className="border p-2 rounded-lg"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
+                <option>All status</option>
+                <option>Not Submitted</option>
+                <option>Printed</option>
+                <option>Submitted</option>
+                <option>Issue</option>
+                <option>Ready to print</option>
+              </select>
+            </div>
             {/* Instructor Filter */}
             <div className="flex flex-col">
               <label className="text-gray-600">Instructor</label>
@@ -276,7 +291,7 @@ export default function TechUnitPage() {
             {/* Apply Button */}
             <div className="flex flex-col justify-end">
               <button
-                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500 w-1/2"
+                className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-500"
                 onClick={handleApplyFilters}
               >
                 Apply
