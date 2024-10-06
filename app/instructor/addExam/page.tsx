@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState,Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { getUserEmailFromCookies } from '@/utils/cookies/cookieUtils';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -536,6 +536,7 @@ function MainContent() {
             <input
               type="file"
               onChange={handleFileChange}
+              accept="application/pdf"
               className="w-full p-2 border rounded"
             />
             <p className="text-gray-600 text-sm mt-1">

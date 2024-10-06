@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState,Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LayoutTech from '@/components/LayoutTech';
@@ -27,14 +27,8 @@ interface ExamData {
   PhoneNumber: string;
   OfficeRoom: string;
 }
-export default function AddExamPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <ReviewExamPage />
-    </Suspense>
-  );
-}
-function ReviewExamPage() {
+
+export default function ReviewExamPage() {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -252,53 +246,66 @@ function ReviewExamPage() {
                 <p>
                   <strong>ต้องการกระดาษคำตอบหรือไม่:</strong>{' '}
                   <span
-                    className={
-                      examData.AnswerSheet ? 'text-green-500' : 'text-red-500'
-                    }
+                    className={`${examData.AnswerSheet ? 'text-green-500' : 'text-red-500'}`}
                   >
-                    {examData.AnswerSheet ? 'Yes' : 'No'}
+                    <input
+                      type="checkbox"
+                      checked={examData.AnswerSheet === true}
+                      readOnly
+                      className={`ml-2 ${examData.AnswerSheet ? 'bg-green-500' : 'bg-red-500'}`}
+                    />
+                    {examData.AnswerSheet ? '  Yes' : '  No'}
                   </span>
                 </p>
               </div>
 
-              {/* Note Allowed */}
               <div className="mb-4">
                 <p>
                   <strong>นำตำราเข้าห้องสอบได้:</strong>{' '}
                   <span
-                    className={
-                      examData.Note ? 'text-green-500' : 'text-red-500'
-                    }
+                    className={`${examData.Note ? 'text-green-500' : 'text-red-500'}`}
                   >
-                    {examData.Note ? 'Yes' : 'No'}
+                    <input
+                      type="checkbox"
+                      checked={examData.Note === true}
+                      readOnly
+                      className={`ml-2 ${examData.Note ? 'bg-green-500' : 'bg-red-500'}`}
+                    />
+                    {examData.Note ? '  Yes' : '  No'}
                   </span>
                 </p>
               </div>
 
-              {/* Calculator Allowed */}
               <div className="mb-4">
                 <p>
                   <strong>นำเครื่องคิดเลขเข้าห้องสอบได้:</strong>{' '}
                   <span
-                    className={
-                      examData.Calculator ? 'text-green-500' : 'text-red-500'
-                    }
+                    className={`${examData.Calculator ? 'text-green-500' : 'text-red-500'}`}
                   >
-                    {examData.Calculator ? 'Yes' : 'No'}
+                    <input
+                      type="checkbox"
+                      checked={examData.Calculator === true}
+                      readOnly
+                      className={`ml-2 ${examData.Calculator ? 'bg-green-500' : 'bg-red-500'}`}
+                    />
+                    {examData.Calculator ? '  Yes' : '  No'}
                   </span>
                 </p>
               </div>
 
-              {/* Ruler Allowed */}
               <div className="mb-4">
                 <p>
                   <strong>ห้ามนำไม้บรรทัดมีสูตรคณิตศาสตร์เข้าสอบ:</strong>{' '}
                   <span
-                    className={
-                      examData.Ruler ? 'text-green-500' : 'text-red-500'
-                    }
+                    className={`${examData.Ruler ? 'text-green-500' : 'text-red-500'}`}
                   >
-                    {examData.Ruler ? 'Yes' : 'No'}
+                    <input
+                      type="checkbox"
+                      checked={examData.Ruler === true}
+                      readOnly
+                      className={`ml-2 ${examData.Ruler ? 'bg-green-500' : 'bg-red-500'}`}
+                    />
+                    {examData.Ruler ? '  Yes' : '  No'}
                   </span>
                 </p>
               </div>
