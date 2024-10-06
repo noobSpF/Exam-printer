@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense} from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter, useSearchParams } from 'next/navigation';
 import LayoutTech2 from '@/components/LayoutTech2';
@@ -24,8 +24,14 @@ interface BackupExamData {
   StudentAmount: string;
   Instructor: string;
 }
-
-export default function BackupExamPage() {
+export default function AddExamPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <BackupExamPage />
+    </Suspense>
+  );
+}
+function BackupExamPage() {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

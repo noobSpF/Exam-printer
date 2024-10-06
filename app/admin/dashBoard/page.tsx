@@ -35,7 +35,9 @@ export default function AdminDashboard() {
     }
     fetchUsers();
   }, []);
-
+  const handleProfile = () => {
+    router.push('/admin/profile'); // Navigate to Add User page
+  };
   const handleDeleteUser = async (userId: number) => {
     const confirmed = window.confirm(
       'Are you sure you want to delete this user? This action cannot be undone.'
@@ -57,9 +59,18 @@ export default function AdminDashboard() {
   return (
     <div className="p-10 bg-orange-100 min-h-screen">
       <h1 className="text-4xl font-bold text-purple-700 mb-6">Exam printer</h1>
-      <p className="text-xl mb-2">
-        ระบบจัดพิมพ์ข้อสอบ <br /> คณะวิทยาศาสตร์ มหาวิทยาลัยสงขลานครินทร์
-      </p>
+      
+      <div className="flex justify-between items-center mb-6">
+        <p className="text-xl">
+          ระบบจัดพิมพ์ข้อสอบ <br /> คณะวิทยาศาสตร์ มหาวิทยาลัยสงขลานครินทร์
+        </p>
+        <button
+          className="w-10 h-10 bg-gray-300 text-white rounded-full flex justify-center items-center"
+          onClick={handleProfile}
+        >
+          👤
+        </button>
+      </div>
 
       <div className="mt-8">
         <h2 className="text-5xl mb-4 font-bold">Admin</h2>
@@ -118,4 +129,4 @@ export default function AdminDashboard() {
       </div>
     </div>
   );
-}
+};

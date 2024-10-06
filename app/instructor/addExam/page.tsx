@@ -1,19 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState,Suspense } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { getUserEmailFromCookies } from '@/utils/cookies/cookieUtils';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Layout from '@/components/Layout';
-
 interface InstructorData {
   name: string;
   email: string;
   phone: string;
   rol: string;
 }
-
-export default function AddExamPage() {
+export default function AddExamForm() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MainContent />
+    </Suspense>
+  );
+}
+function MainContent() {
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!

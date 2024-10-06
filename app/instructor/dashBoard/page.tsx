@@ -3,17 +3,15 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { useRouter } from 'next/navigation';
-import { getUserEmailFromCookies } from '@/utils/cookies/cookieUtils'; // Import the cookie utility
+import { getUserEmailFromCookies } from '@/utils/cookies/cookieUtils';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus } from '@fortawesome/free-solid-svg-icons'; // Import the Plus icon
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
-// Supabase client creation
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 );
 
-// Define types for your data
 interface SubjectData {
   SubID: string;
   SubName: string;
@@ -21,7 +19,7 @@ interface SubjectData {
   Instructor: string;
   StudentAmount: number;
   DueDate: string;
-  Status: string; // Now coming from the Exam table
+  Status: string;
 }
 
 export default function InstructorPage() {
@@ -32,52 +30,38 @@ export default function InstructorPage() {
 
   const [subject, setSubject] = useState<string>('All subject');
   const [term, setTerm] = useState<string>('All term');
-  const [dueDate, setDueDate] = useState<string>(''); // This will be a date string
+  const [dueDate, setDueDate] = useState<string>(''); 
   const [status, setStatus] = useState<string>('All status');
   const [instructor, setInstructor] = useState<string>('All instructor');
 
-  // Fetch subject and exam data with a join
   useEffect(() => {
     const fetchSubjects = async () => {
       try {
-        // Get the logged-in instructor email from cookies
         const email = await getUserEmailFromCookies();
         console.log('Retrieved email from cookies:', email);
 
         if (!email) {
           setError('No email found in cookies');
-          setLoading(false);
           return;
         }
 
-        // Fetch the username from the Users table based on the email
         const { data: userData, error: userError } = await supabase
           .from('Users')
           .select('username')
           .eq('Email', email)
-          .single(); // Expecting a single result
+          .single();
 
         if (userError || !userData) {
           console.error('Error fetching user data:', userError);
           setError('Error fetching user data.');
-          setLoading(false);
           return;
         }
 
         const username = userData.username;
 
-        // Fetch subjects related to this instructor (username)
         const { data: subjectData, error: subjectError } = await supabase
           .from('Subject')
-          .select(
-            `
-            SubID, 
-            SubName, 
-            Term, 
-            Instructor, 
-            StudentAmount
-          `
-          ) // Fetching only subject-related data
+          .select('SubID, SubName, Term, Instructor, StudentAmount')
           .eq('Instructor', username);
 
         if (subjectError) {
@@ -86,32 +70,26 @@ export default function InstructorPage() {
           return;
         }
 
-        // Map over subjects and for each subject, fetch the corresponding exam's DueDate and Status
         const transformedData = await Promise.all(
-          subjectData.map(async (subject: any) => {
-            // Fetch the exam data separately by SubID
+          subjectData.map(async (subject) => {
             const { data: examData, error: examError } = await supabase
               .from('Exam')
               .select('DueDate, Status')
               .eq('SubID', subject.SubID)
-              .single(); // Assuming there's only one exam per subject
+              .single();
 
             if (examError) {
-              console.error(
-                `Error fetching exam for subject ${subject.SubID}:`,
-                examError
-              );
+              console.error(`Error fetching exam for subject ${subject.SubID}:`, examError);
             }
 
-            // Return the transformed data with exam details
             return {
               SubID: subject.SubID,
               SubName: subject.SubName,
               Term: subject.Term,
               Instructor: subject.Instructor,
               StudentAmount: subject.StudentAmount,
-              DueDate: examData?.DueDate || 'No due date', // Handle missing due dates
-              Status: examData?.Status || 'No status', // Handle missing statuses
+              DueDate: examData?.DueDate || 'No due date',
+              Status: examData?.Status || 'No status',
             };
           })
         );
@@ -129,76 +107,86 @@ export default function InstructorPage() {
   }, []);
 
   const handleProfile = () => {
-    router.push('/instructor/profile'); // Navigate to Add User page
+    router.push('/instructor/profile');
   };
 
   const handleApplyFilters = async () => {
     try {
-      setLoading(true); // Start loading state
-
-      // Build the query dynamically based on the filter values
-      let query = supabase.from('Subject').select(
-        `
-          SubID, 
-          SubName, 
-          Term, 
-          Instructor, 
-          StudentAmount,
-          Exam(DueDate, Status)
-        `
-      );
-
-      // Apply filters based on selected values
+      setLoading(true);
+  
+      // Start with the Exam query if status filter is applied
+      let subIDs;
+      if (status !== 'All status') {
+        const { data: examData, error: examError } = await supabase
+          .from('Exam')
+          .select('SubID')
+          .eq('Status', status);
+  
+        if (examError) {
+          console.error('Error fetching exams:', examError);
+          setError('Error applying filters.');
+          return;
+        }
+  
+        subIDs = examData.map(exam => exam.SubID);
+      }
+  
+      // Now query the Subject table
+      let query = supabase
+        .from('Subject')
+        .select('SubID, SubName, Term, Instructor, StudentAmount');
+  
+      // Apply filters
       if (subject !== 'All subject') {
         query = query.eq('SubID', subject);
       }
       if (term !== 'All term') {
         query = query.eq('Term', term);
       }
-      if (dueDate) {
-        query = query.eq('Exam.DueDate', dueDate); // Assuming DueDate is stored in the Exam table
-      }
-      if (status !== 'All status') {
-        query = query.eq('Exam.Status', status); // Assuming Status is in the Exam table
-      }
       if (instructor !== 'All instructor') {
         query = query.eq('Instructor', instructor);
       }
-
-      // Execute the query
+      if (subIDs) {
+        query = query.in('SubID', subIDs);
+      }
+  
       const { data: subjectData, error: subjectError } = await query;
-
+  
       if (subjectError) {
         console.error('Error fetching filtered subjects:', subjectError);
         setError('Error fetching filtered subjects.');
-        setLoading(false);
         return;
       }
-
-      // Transform data similar to initial fetch
+  
+      // Transform data
       const transformedData = await Promise.all(
-        subjectData.map(async (subject: any) => {
+        subjectData.map(async (subject) => {
+          const { data: examData } = await supabase
+            .from('Exam')
+            .select('DueDate, Status')
+            .eq('SubID', subject.SubID)
+            .single();
+  
           return {
             SubID: subject.SubID,
             SubName: subject.SubName,
             Term: subject.Term,
             Instructor: subject.Instructor,
             StudentAmount: subject.StudentAmount,
-            DueDate: subject.Exam?.DueDate || 'No due date', // Handle missing due dates
-            Status: subject.Exam?.Status || 'No status', // Handle missing statuses
+            DueDate: examData?.DueDate || 'No due date',
+            Status: examData?.Status || 'No status',
           };
         })
       );
-
-      setSubjects(transformedData); // Update state with filtered data
+  
+      setSubjects(transformedData);
     } catch (err) {
       console.error('Unexpected error:', err);
       setError('An unexpected error occurred.');
     } finally {
-      setLoading(false); // Stop loading state
+      setLoading(false);
     }
   };
-
   return (
     <div className="flex flex-col lg:flex-row min-h-screen">
       {/* Sidebar */}

@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const MAX_REDIRECTS = 5;
 
 const rolePaths = {
-  Admin: ['/admin/dashBoard', '/admin/addUser', '/admin/editUser'],
+  Admin: ['/admin/dashBoard', '/admin/addUser', '/admin/editUser','/admin/profile'],
   Instructor: [
     '/instructor/dashBoard',
     '/instructor/profile',
